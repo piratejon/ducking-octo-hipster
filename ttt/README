@@ -1,0 +1,9 @@
+This tool makes it easy to create and view truth tables in a web browser. In a
+"variable" column, "true" and "false" values exist for each combination of
+variable values -- so if five variables are added, 32 rows will be
+automatically created, each containing a unique combination of variable values.
+When at least one variable column exists, it is possible to add an "operation"
+column which applies a binary boolean operator to operands chosen from the
+columns that have been added. This means it is easy to create truth tables for
+complex compositions of binary operations by building them up one operation at
+a time.
