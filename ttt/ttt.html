@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="ttt.css" media="screen" />
+    <script src="jquery-1.8.3.min.js"></script>
+    <script src="ttt.js"></script>
+    <title>Truth Table Tool</title>
+  </head>
+  <body>
+    <p>Binary boolean operators: <table id="binboolop"></table>
+    <p><a class="action" onclick="addvariable()">Add Variable</a>
+    <p><a class="action" onclick="addop()">Add Operation</a>
+      <label>Operation: <select name="op"></select></label>
+      <label>Left operand: <select name="lop"></select></label>
+      <label>Right operand: <select name="rop"></select></label>
+      <label>Name: <input type="text" name="name" /></label>
+      <p>Truth Table:<p><table id="tt"><tbody><tr id="header"></tbody></table>
+  </body>
+</html>
