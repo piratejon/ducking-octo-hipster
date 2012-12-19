@@ -134,7 +134,6 @@ function get_operation_result ( bb, l, r, op )
 
 function add_calculated_column_to_table(lop, op, rop, name)
 {
-  alert('adding column ' + lop + ' ' + op + ' ' + rop + ' ' + name);
   if ( lop && op && rop && name )
   {
     var thead_tr = $('#tt > thead > tr');
