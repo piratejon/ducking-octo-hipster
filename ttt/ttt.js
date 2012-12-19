@@ -57,7 +57,10 @@ function create_header_row(vars, bb)
     out.appendChild(td);
   }
 
-  return out;
+  var thead = document.createElement('thead');
+  thead.appendChild(out);
+
+  return thead;
 }
 
 function initialize_operators()
@@ -131,28 +134,29 @@ function get_operation_result ( bb, l, r, op )
 
 function add_calculated_column_to_table(lop, op, rop, name)
 {
+  alert('adding column ' + lop + ' ' + op + ' ' + rop + ' ' + name);
   if ( lop && op && rop && name )
   {
-    var index = $('#header').children().last().index()+1;
+    var thead_tr = $('#tt > thead > tr');
     var bb = generate_bin_bool();
-    var th = document.createElement('td');
+    var th = document.createElement('th');
     th.className = 'op_tbl_op';
     th.innerHTML = name;
-    $('#header').append(th);
+    thead_tr.append(th);
 
-    var datarows = $('#tt').find('.datarow');
+    var datarows = $('#tt > tbody > tr')
 
     for ( var i = 0; i < datarows.length; ++ i )
     {
       var td = document.createElement('td');
-      var l = $(datarows[i]).children().get(lop).innerHTML;
-      var r = $(datarows[i]).children().get(rop).innerHTML;
+      var l = $(datarows[i]).children('td')[lop-1].innerHTML;
+      var r = $(datarows[i]).children('td')[rop-1].innerHTML;
       td.innerHTML = get_operation_result(bb, l, r, op);
       td.className = 'op_tbl_op';
       $(datarows[i]).append(td);
     }
 
-    add_droperand(name, index);
+    add_droperand(name, thead_tr.children('th').last().index()+1);
   }
 }
 
@@ -162,11 +166,12 @@ function add_variable_to_table()
   v.className = 'op_tbl_var';
 
   var t = $('#tt');
-  var index = $('#header').children().last().index()+1;
-  v.innerHTML = String.fromCharCode('a'.charCodeAt(0)+index);
-  $('#header').append(v);
+  var thead_tr = t.find('thead > tr');
+  v.innerHTML = String.fromCharCode('a'.charCodeAt(0)+thead_tr.children('.op_tbl_var').length);
+  thead_tr.append(v);
 
-  var datarows = t.find('.datarow');
+  var tbody = t.find('tbody');
+  var datarows = tbody.children();
 
   if ( datarows.length > 0 )
   {
@@ -186,7 +191,7 @@ function add_variable_to_table()
       // $(clonus).children('.varcell').last().after(td);
       $(clonus).append(td);
 
-      t.append(clonus);
+      tbody.append(clonus);
     }
   }
   else
@@ -197,7 +202,7 @@ function add_variable_to_table()
     td.className = 'varcell';
     td.innerHTML = STR_TRUE;
     tr.appendChild(td);
-    t.append(tr);
+    tbody.append(tr);
 
     var tr = document.createElement('tr');
     tr.className = 'datarow';
@@ -205,10 +210,10 @@ function add_variable_to_table()
     td.className = 'varcell';
     td.innerHTML = STR_FALSE;
     tr.appendChild(td);
-    t.append(tr);
+    tbody.append(tr);
   }
 
-  add_droperand(v.innerHTML, index);
+  add_droperand(v.innerHTML, thead_tr.children('th').last().index()+1);
 }
 
 function addvariable()

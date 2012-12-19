@@ -1,16 +1,16 @@
-#binboolop td,th
+thead tr th
 {
   width: 3em;
   border: 1px solid black;
   text-align: center;
 }
 
-#binboolop .op_tbl_var
+thead tr th.op_tbl_var
 {
   background-color: #ffff99;
 }
 
-#binboolop .op_tbl_op
+thead tr th.op_tbl_op
 {
   background-color: #99e0ff;
 }
@@ -29,6 +29,8 @@ a.action
 
 td
 {
+  width: 3em;
+  border: 1px solid black;
   text-align: center;
 }
 
