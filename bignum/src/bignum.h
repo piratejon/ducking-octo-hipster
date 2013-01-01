@@ -26,6 +26,11 @@ int bigint_compare ( BigInt *, BigInt * );
 void bigint_add ( BigInt *, BigInt * );
 void bigint_multiply ( BigInt *, BigInt * );
 BigInt * bigint_copy ( BigInt * );
+void bigint_shift_right ( BigInt *, int );
+void bigint_shift_left ( BigInt *, int );
+bool bigint_pop_lsb ( BigInt * );
+bool bigint_pop_msb ( BigInt * );
+void append_bit ( BigInt *, int );
 
 #endif // _BIGNUM_H
 

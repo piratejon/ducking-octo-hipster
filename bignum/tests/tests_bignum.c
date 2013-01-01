@@ -123,8 +123,8 @@ void test_bigint_multiply ( void )
   BigInt * d = init_bigint ( 93025 );
 
   bigint_multiply ( a, b );
-  ASSERT ( bigint_low_dword ( c ) == 60695, "Multiply failed." );
-  ASSERT ( bigint_compare ( b, c ) == 0, "Equality failed after multiply." );
+  ASSERT ( bigint_low_dword ( a ) == 60695, "Multiply failed." );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Equality failed after multiply." );
 
   bigint_multiply ( b, b );
   ASSERT ( bigint_low_dword ( b ) == 93025, "Self multiply failed." );
@@ -133,6 +133,32 @@ void test_bigint_multiply ( void )
   free_bigint ( d );
   free_bigint ( c );
   free_bigint ( b );
+  free_bigint ( a );
+}
+
+void test_bigint_shift ( void )
+{
+  BigInt * a = init_bigint ( 100 );
+
+  bigint_shift_right ( a, 2 );
+  ASSERT ( bigint_low_dword ( a ) == 25, "Failed to shift 100 right by two." );
+
+  bigint_shift_left ( a, 4 );
+  ASSERT ( bigint_low_dword ( a ) == 400, "Failed to shift 25 left by four." );
+
+  free_bigint ( a );
+}
+
+void test_bigint_pop ( void )
+{
+  BigInt * a = init_bigint ( 100 );
+
+  ASSERT ( false == bigint_pop_lsb ( a ), "Popped wrong value from 100." );
+  ASSERT ( bigint_low_dword ( a ) == 50, "Failed to pop LSB from 100." );
+
+  ASSERT ( true == bigint_pop_msb ( a ), "Popped wrong value from 50." );
+  ASSERT ( bigint_low_dword ( a ) == 18, "Failed to pop MSB from 50." );
+
   free_bigint ( a );
 }
 
@@ -145,6 +171,8 @@ void do_tests ( void )
   TEST ( test_prepend );
   TEST ( test_bigint_add );
   TEST ( test_bigint_copy );
+  TEST ( test_bigint_pop );
+  TEST ( test_bigint_shift );
   TEST ( test_bigint_multiply );
 }
 

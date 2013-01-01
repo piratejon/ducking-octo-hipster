@@ -15,6 +15,50 @@
   return b;
 }
 
+bool bigint_pop_msb ( BigInt * bi )
+{
+  bool out = false;
+
+  if ( bi->msb )
+  {
+    Bit * new_msb = bi->msb->prev;
+
+    if ( new_msb )
+    {
+      new_msb->next = NULL;
+    }
+
+    out = bi->msb->bit;
+
+    free ( bi->msb );
+    bi->msb = new_msb;
+  }
+
+  return out;
+}
+
+bool bigint_pop_lsb ( BigInt * bi )
+{
+  bool out = false;
+
+  if ( bi->lsb )
+  {
+    Bit * new_lsb = bi->lsb->next;
+
+    if ( new_lsb )
+    {
+      new_lsb->prev = NULL;
+    }
+
+    out = bi->lsb->bit;
+
+    free ( bi->lsb );
+    bi->lsb = new_lsb;
+  }
+
+  return out;
+}
+
 void append_bit ( BigInt * bi, int b )
 {
   Bit * bit = malloc(sizeof*bit);
@@ -288,14 +332,60 @@ void bigint_add ( BigInt * augend, BigInt * addend )
   }
 }
 
+void bigint_shift_right ( BigInt * a, int count )
+{
+  for ( ; count > 0 && a->count > 0; count --, a->count -- )
+  {
+    bigint_pop_lsb ( a );
+  }
+}
+
+void bigint_shift_left ( BigInt * a, int count )
+{
+  for ( ; count > 0 && a->count > 0; count --, a->count -- )
+  {
+    prepend_bit ( a, 0 );
+  }
+}
+
+void bigint_swap ( BigInt * a, BigInt * b )
+{
+  BigInt tmp;
+  tmp.count = a->count;
+  tmp.lsb = a->lsb;
+  tmp.msb = a->msb;
+
+  a->count = b->count;
+  a->lsb = b->lsb;
+  a->msb = b->msb;
+
+  b->count = tmp.count;
+  b->lsb = tmp.lsb;
+  b->msb = tmp.msb;
+}
+
 void bigint_multiply ( BigInt * a, BigInt * b )
 {
-  if ( a == b )
+  // shift-add method
+  BigInt * r, *tmp;
+  Bit * current;
+  int i;
+
+  r = init_bigint_empty ( );
+
+  for ( current = b->lsb, i = 0; current; ++i, current = current->next )
   {
-    BigInt * c = bigint_copy ( a );
-    bigint_multiply ( a, c );
-    free_bigint ( c );
-    return;
+    if ( current->bit )
+    {
+      tmp = bigint_copy ( a );
+      bigint_shift_left ( tmp, i );
+      bigint_add ( r, tmp );
+      free_bigint ( tmp );
+    }
   }
+
+  bigint_swap ( a, r );
+
+  free_bigint ( r );
 }
 
