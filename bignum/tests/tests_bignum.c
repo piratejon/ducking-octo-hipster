@@ -162,6 +162,22 @@ void test_bigint_pop ( void )
   free_bigint ( a );
 }
 
+void test_bigint_div_10 ( void )
+{
+  BigInt * a = init_bigint ( 987653 );
+  BigInt * b = init_bigint ( 98765 );
+  BigInt * c = init_bigint ( 3 );
+  BigInt * r = bigint_div_10 ( a );
+
+  ASSERT ( bigint_compare ( a, b ) == 0, "Incorrect quotient after div10." );
+  ASSERT ( bigint_compare ( r, c ) == 0, "Incorrect remainder after div10." );
+
+  free_bigint ( r );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
@@ -174,5 +190,6 @@ void do_tests ( void )
   TEST ( test_bigint_pop );
   TEST ( test_bigint_shift );
   TEST ( test_bigint_multiply );
+  TEST ( test_bigint_div_10 );
 }
 

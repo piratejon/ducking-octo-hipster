@@ -389,3 +389,10 @@ void bigint_multiply ( BigInt * a, BigInt * b )
   free_bigint ( r );
 }
 
+BigInt * bigint_div_10 ( BigInt * a )
+{
+  BigInt * r = NULL;
+
+  return r;
+}
+

@@ -31,6 +31,8 @@ void bigint_shift_left ( BigInt *, int );
 bool bigint_pop_lsb ( BigInt * );
 bool bigint_pop_msb ( BigInt * );
 void append_bit ( BigInt *, int );
+void prepend_bit ( BigInt *, int );
+BigInt * bigint_div_10 ( BigInt * );
 
 #endif // _BIGNUM_H
 
