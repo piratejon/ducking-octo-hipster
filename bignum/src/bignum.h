@@ -15,6 +15,7 @@ typedef struct _tag_bit
 typedef struct _tag_bigint
 {
   int count;
+  bool positive;
   Bit * lsb, * msb;
 } BigInt;
 
