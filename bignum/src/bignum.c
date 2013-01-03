@@ -10,7 +10,7 @@
   {
     b->count = 0;
     b->msb = b->lsb = NULL;
-    b->positive = true;
+    // b->positive = true;
   }
 
   return b;
