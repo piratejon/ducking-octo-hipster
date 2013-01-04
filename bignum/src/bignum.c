@@ -10,7 +10,7 @@
   {
     b->count = 0;
     b->msb = b->lsb = NULL;
-    // b->positive = true;
+    b->positive = true;
   }
 
   return b;
@@ -120,6 +120,12 @@ BigInt * init_bigint ( int i )
   BigInt * bi = init_bigint_empty ( );
   if ( bi )
   {
+    if ( i < 0 )
+    {
+      i = 0-i;
+      bi->positive = false;
+    }
+
     do
     {
       append_bit ( bi, i & 1 );
@@ -397,3 +403,7 @@ BigInt * bigint_div_10 ( BigInt * a )
   return r;
 }
 
+bool bigint_positive ( BigInt * a )
+{
+  return false;
+}

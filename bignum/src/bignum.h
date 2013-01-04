@@ -15,7 +15,7 @@ typedef struct _tag_bit
 typedef struct _tag_bigint
 {
   int count;
-   // bool positive;
+  bool positive;
   Bit * lsb, * msb;
 } BigInt;
 
@@ -34,6 +34,7 @@ bool bigint_pop_msb ( BigInt * );
 void append_bit ( BigInt *, int );
 void prepend_bit ( BigInt *, int );
 BigInt * bigint_div_10 ( BigInt * );
+bool bigint_positive ( BigInt * );
 
 #endif // _BIGNUM_H
 

@@ -40,6 +40,16 @@ void test_initialize_bignum ( void )
   free_bigint ( bi );
 }
 
+void test_initialize_negative ( void )
+{
+  BigInt * a = init_bigint ( -9345781 );
+
+  ASSERT ( bigint_positive ( a ) == false, "BigInt had wrong sign." );
+  ASSERT ( bigint_low_dword ( a ) == 9345781, "BigInt had wrong magnitude." );
+
+  free_bigint ( a );
+}
+
 void test_bigint_compare ( void )
 {
   BigInt * a = init_bigint ( 35 );
@@ -178,11 +188,33 @@ void test_bigint_div_10 ( void )
   free_bigint ( a );
 }
 
+void test_bigint_subtract ( void )
+{
+  BigInt * a = init_bigint ( 9999 );
+  BigInt * b = init_bigint ( 3456 );
+  BigInt * c = init_bigint ( 1000000 );
+  BigInt * d = init_bigint ( 6543 );
+  BigInt * e = init_bigint ( -993457 );
+
+  // bigint_subtract ( a, b );
+  ASSERT ( bigint_compare ( a, d ) == 0, "Compare failed after subtract." );
+
+  // bigint_subtract ( d, c );
+  // ASSERT ( bigint_compare ( d, e
+
+  free_bigint ( e );
+  free_bigint ( d );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
   TEST ( sanity_check_one );
   TEST ( test_initialize_bignum );
+  TEST ( test_initialize_negative );
   TEST ( test_bigint_compare );
   TEST ( test_prepend );
   TEST ( test_bigint_add );
@@ -190,6 +222,7 @@ void do_tests ( void )
   TEST ( test_bigint_pop );
   TEST ( test_bigint_shift );
   TEST ( test_bigint_multiply );
+  // TEST ( test_bigint_subtract );
   // TEST ( test_bigint_div_10 );
 }
 
