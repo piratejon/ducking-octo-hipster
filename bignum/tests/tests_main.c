@@ -33,7 +33,7 @@ void send_message ( char * message )
 
 char * recv_message ( void )
 {
-  char * message;
+  char * message = NULL;
   if ( read ( pipefd[0], &len, sizeof(len) ) == sizeof(len) )
   {
     int i = 0, bytes_read;
@@ -81,7 +81,6 @@ int execute_test ( char * test_name, void(*test_func)(void) )
   }
   else
   {
-    char * message = NULL;
     int kid_status;
 
     tested ++;
