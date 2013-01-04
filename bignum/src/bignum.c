@@ -405,5 +405,5 @@ BigInt * bigint_div_10 ( BigInt * a )
 
 bool bigint_positive ( BigInt * a )
 {
-  return false;
+  return a->positive;
 }
