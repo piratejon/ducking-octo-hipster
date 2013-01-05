@@ -39,6 +39,9 @@ bool bigint_positive ( BigInt * );
 void bigint_subtract_in_place ( BigInt *, BigInt * );
 void single_bit_subtract_in_place ( bool *, bool, bool * );
 void single_bit_add_in_place ( bool *, bool, bool * );
+void _real_bigint_add_in_place ( BigInt *, BigInt * );
+void _real_bigint_subtract_in_place ( BigInt *, BigInt * );
+void bigint_swap ( BigInt *, BigInt * );
 
 #endif // _BIGNUM_H
 

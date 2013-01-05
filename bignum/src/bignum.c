@@ -180,13 +180,10 @@ int bigint_low_dword ( BigInt * bi )
   return lodword;
 }
 
-int bigint_compare ( BigInt * A, BigInt * B )
+int bigint_compare_magnitude ( BigInt * A, BigInt * B )
 {
   int i;
   Bit * a, * b;
-
-  if ( A->positive && ! B->positive ) return 1;
-  if ( ! A->positive && B->positive ) return -1;
 
   a = A->msb;
   b = B->msb;
@@ -254,6 +251,14 @@ int bigint_compare ( BigInt * A, BigInt * B )
   return 0;
 }
 
+int bigint_compare ( BigInt * A, BigInt * B )
+{
+  if ( A->positive && ! B->positive ) return 1;
+  if ( ! A->positive && B->positive ) return -1;
+
+  return bigint_compare_magnitude ( A, B );
+}
+
 void single_bit_add_in_place ( bool * a, bool B, bool * carry )
 {
   bool A = *a;
@@ -263,17 +268,73 @@ void single_bit_add_in_place ( bool * a, bool B, bool * carry )
   *carry = (A&C)|(B&C)|(A&B&~C);
 }
 
-void bigint_add_in_place ( BigInt * augend, BigInt * addend )
+void bigint_add_in_place ( BigInt * A, BigInt * B )
 {
-  bool carry = false;
-  Bit * a, * b;
-
-  if ( augend == addend )
+  if ( A == B || bigint_compare ( A, B ) == 0 )
   {
-    prepend_bit ( augend, false );
+    prepend_bit ( A, false );
     return;
   }
 
+  if ( A->positive )
+  {
+    if ( B->positive )
+    {
+      _real_bigint_add_in_place ( A, B );
+    }
+    else
+    {
+      // A + (-B)
+      bool result_positive;
+      BigInt * bneg = bigint_copy ( B );
+      bneg->positive = true;
+      result_positive = bigint_compare ( A, bneg ) > 0;
+      _real_bigint_subtract_in_place ( bneg, A );
+      bigint_swap ( bneg, A );
+      free_bigint ( bneg );
+      A->positive = result_positive;
+    }
+  }
+  else
+  {
+    if ( B->positive )
+    {
+      // (-A) + B
+      // positive if |A| < |B|
+      // negative if |A| > |B|
+      bool result_positive;
+      BigInt * a, * b;
+      a = bigint_copy ( A );
+      b = bigint_copy ( B );
+
+      if ( bigint_compare_magnitude ( a, b ) > 0 )
+      {
+        a->positive = true;
+        _real_bigint_subtract_in_place ( b, a );
+        bigint_swap ( A, b );
+      }
+      else
+      {
+        a->positive = true;
+        _real_bigint_subtract_in_place ( a, b );
+        a->positive = false;
+        bigint_swap ( A, a );
+      }
+
+      free_bigint ( a );
+      free_bigint ( b );
+    }
+    else
+    {
+      _real_bigint_add_in_place ( A, B );
+    }
+  }
+}
+
+void _real_bigint_add_in_place ( BigInt * augend, BigInt * addend )
+{
+  bool carry = false;
+  Bit * a, * b;
   a = augend->lsb;
   b = addend->lsb;
 
@@ -395,11 +456,12 @@ void single_bit_subtract_in_place ( bool * a, bool B, bool * borrow )
   *borrow = (Borrow & ~A) | (Borrow & B) | (~Borrow & ~A & B);
 }
 
-void bigint_subtract_in_place ( BigInt * A, BigInt * B )
+void _real_bigint_subtract_in_place ( BigInt * A, BigInt * B )
 {
   Bit * a, *b;
   bool borrow;
 
+  /*
   if ( A->positive && B->positive )
   {
     if ( bigint_compare ( A, B ) < 0 )
@@ -437,6 +499,7 @@ void bigint_subtract_in_place ( BigInt * A, BigInt * B )
       // proceed as normal
     }
   }
+  */
 
   a = A->lsb;
   b = B->lsb;
