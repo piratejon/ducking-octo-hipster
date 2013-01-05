@@ -86,6 +86,7 @@ BigInt * bigint_copy ( BigInt * a )
 {
   BigInt * b = init_bigint_empty ( );
 
+  b->positive = a->positive;
   Bit * current = a->lsb;
 
   while ( current )
@@ -118,20 +119,19 @@ void prepend_bit ( BigInt * bi, int b )
 BigInt * init_bigint ( int i )
 {
   BigInt * bi = init_bigint_empty ( );
-  if ( bi )
-  {
-    if ( i < 0 )
-    {
-      i = 0-i;
-      bi->positive = false;
-    }
 
-    do
-    {
-      append_bit ( bi, i & 1 );
-      i >>= 1;
-    } while ( i > 0 );
+  if ( i < 0 )
+  {
+    i = 0-i;
+    bi->positive = false;
   }
+
+  while ( i > 0 )
+  {
+    append_bit ( bi, i & 1 );
+    i >>= 1;
+  }
+
   return bi;
 }
 
@@ -185,6 +185,9 @@ int bigint_compare ( BigInt * A, BigInt * B )
   int i;
   Bit * a, * b;
 
+  if ( A->positive && ! B->positive ) return 1;
+  if ( ! A->positive && B->positive ) return -1;
+
   a = A->msb;
   b = B->msb;
 
@@ -199,7 +202,14 @@ int bigint_compare ( BigInt * A, BigInt * B )
     {
       if ( a->bit )
       {
-        return 1;
+        if ( A->positive )
+        {
+          return 1;
+        }
+        else
+        {
+          return -1;
+        }
       }
       else
       {
@@ -215,11 +225,25 @@ int bigint_compare ( BigInt * A, BigInt * B )
       // printf("comparing %d with %d (index %d)\n", a->bit, b->bit, i );
       if ( a->bit > b->bit )
       {
-        return 1;
+        if ( A->positive )
+        {
+          return 1;
+        }
+        else
+        {
+          return -1;
+        }
       }
       else if ( b->bit > a->bit )
       {
-        return -1;
+        if ( A->positive )
+        {
+          return -1;
+        }
+        else
+        {
+          return 1;
+        }
       }
 
       a = a->prev;
@@ -230,14 +254,23 @@ int bigint_compare ( BigInt * A, BigInt * B )
   return 0;
 }
 
-void bigint_add ( BigInt * augend, BigInt * addend )
+void single_bit_add_in_place ( bool * a, bool B, bool * carry )
 {
-  int carry = 0;
+  bool A = *a;
+  bool C = *carry;
+
+  *a = A ^ B ^ C;
+  *carry = (A&C)|(B&C)|(A&B&~C);
+}
+
+void bigint_add_in_place ( BigInt * augend, BigInt * addend )
+{
+  bool carry = false;
   Bit * a, * b;
 
   if ( augend == addend )
   {
-    prepend_bit ( augend, 0 );
+    prepend_bit ( augend, false );
     return;
   }
 
@@ -246,96 +279,29 @@ void bigint_add ( BigInt * augend, BigInt * addend )
 
   while ( a && b )
   {
-    switch ( carry + a->bit + b->bit )
-    {
-      case 3:
-        a->bit = 1;
-        carry = 1;
-        break;
-
-      case 2:
-        a->bit = 0;
-        carry = 1;
-        break;
-
-      case 1:
-        a->bit = 1;
-        carry = 0;
-        break;
-
-      case 0:
-        a->bit = 0;
-        carry = 0;
-        break;
-    }
+    single_bit_add_in_place ( &(a->bit), b->bit, &carry );
 
     a = a->next;
     b = b->next;
   }
 
-  if ( a )
+  while ( a )
   {
-    while ( a )
-    {
-      switch ( carry + a->bit )
-      {
-        case 2:
-          a->bit = 0;
-          carry = 1;
-          break;
-
-        case 1:
-          a->bit = 1;
-          carry = 0;
-          break;
-
-        case 0:
-          a->bit = 0;
-          carry = 0;
-          break;
-      }
-
-      a = a->next;
-    }
-
-    if ( carry )
-    {
-      append_bit ( augend, 1 );
-    }
+    single_bit_add_in_place ( &(a->bit), false, &carry );
+    a = a->next;
   }
-  else if ( b )
+
+  while ( b )
   {
-    while ( b )
-    {
-      switch ( carry + b->bit )
-      {
-        case 2:
-          append_bit ( augend, 0 );
-          carry = 1;
-          break;
-
-        case 1:
-          append_bit ( augend, 1 );
-          carry = 0;
-          break;
-
-        case 0:
-          append_bit ( augend, 0 );
-          carry = 0;
-          break;
-      }
-
-      b = b->next;
-    }
-
-    if ( carry )
-    {
-      append_bit ( augend, 1 );
-    }
+    bool A = false;
+    single_bit_add_in_place ( &A, b->bit, &carry );
+    append_bit ( augend, A );
+    b = b->next;
   }
-  else
+
+  if ( carry )
   {
-    return;
+    append_bit ( augend, true );
   }
 }
 
@@ -355,45 +321,45 @@ void bigint_shift_left ( BigInt * a, int count )
   }
 }
 
-void bigint_swap ( BigInt * a, BigInt * b )
+void bigint_shallow_copy ( BigInt * a, BigInt * b )
 {
-  BigInt tmp;
-  tmp.count = a->count;
-  tmp.lsb = a->lsb;
-  tmp.msb = a->msb;
-
   a->count = b->count;
   a->lsb = b->lsb;
   a->msb = b->msb;
-
-  b->count = tmp.count;
-  b->lsb = tmp.lsb;
-  b->msb = tmp.msb;
+  a->positive = b->positive;
 }
 
-void bigint_multiply ( BigInt * a, BigInt * b )
+void bigint_swap ( BigInt * a, BigInt * b )
+{
+  BigInt tmp;
+  bigint_shallow_copy ( &tmp, a );
+  bigint_shallow_copy ( a, b );
+  bigint_shallow_copy ( b, &tmp );
+}
+
+BigInt * bigint_multiply ( BigInt * a, BigInt * b )
 {
   // shift-add method
-  BigInt * r, *tmp;
+  BigInt * product, *tmp;
   Bit * current;
-  int i;
 
-  r = init_bigint_empty ( );
+  tmp = bigint_copy ( a );
+  product = init_bigint_empty ( );
 
-  for ( current = b->lsb, i = 0; current; ++i, current = current->next )
+  for ( current = b->lsb; current; current = current->next )
   {
     if ( current->bit )
     {
-      tmp = bigint_copy ( a );
-      bigint_shift_left ( tmp, i );
-      bigint_add ( r, tmp );
-      free_bigint ( tmp );
+      bigint_add_in_place ( product, tmp );
     }
+    bigint_shift_left ( tmp, 1 );
   }
 
-  bigint_swap ( a, r );
+  free_bigint ( tmp );
 
-  free_bigint ( r );
+  product->positive = ( a->positive == b->positive );
+
+  return ( product );
 }
 
 BigInt * bigint_div_10 ( BigInt * a )
@@ -407,3 +373,87 @@ bool bigint_positive ( BigInt * a )
 {
   return a->positive;
 }
+
+BigInt * bigint_add ( BigInt * a, BigInt * b )
+{
+  BigInt * sum = bigint_copy ( a );
+  bigint_add_in_place ( sum, b );
+  return sum;
+}
+
+void single_bit_subtract_in_place ( bool * a, bool B, bool * borrow )
+  /*
+     this does a -= b, respecting the borrow flag
+   */
+{
+  bool A, Borrow;
+
+  A = *a;
+  Borrow = *borrow;
+
+  *a = A ^ B ^ Borrow;
+  *borrow = (Borrow & ~A) | (Borrow & B) | (~Borrow & ~A & B);
+}
+
+void bigint_subtract_in_place ( BigInt * A, BigInt * B )
+{
+  Bit * a, *b;
+  bool borrow;
+
+  if ( A->positive && B->positive )
+  {
+    if ( bigint_compare ( A, B ) < 0 )
+    {
+      bigint_subtract_in_place ( B, A );
+      bigint_swap ( A, B );
+      return;
+    }
+    else
+    {
+      // subtraction proceeds as usual
+    }
+  }
+  else if ( A->positive && !B->positive )
+  {
+    BigInt * b_pos = bigint_copy ( B );
+    b_pos->positive = true;
+    bigint_add_in_place ( A, b_pos );
+    free_bigint ( b_pos );
+    return;
+  }
+  else if ( !A->positive && B->positive )
+  {
+    // A stays negative; subtraction proceeds as usual
+  }
+  else if ( !A->positive && !B->positive )
+  {
+    if ( bigint_compare ( A, B ) < 0 )
+    {
+      bigint_add_in_place ( A, B );
+      return;
+    }
+    else
+    {
+      // proceed as normal
+    }
+  }
+
+  a = A->lsb;
+  b = B->lsb;
+  borrow = false;
+
+  while ( a && b )
+  {
+    single_bit_subtract_in_place ( &(a->bit), b->bit, &borrow );
+
+    a = a->next;
+    b = b->next;
+  }
+
+  while ( a )
+  {
+    single_bit_subtract_in_place ( &(a->bit), false, &borrow );
+    a = a->next;
+  }
+}
+
