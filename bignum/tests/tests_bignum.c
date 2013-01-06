@@ -507,11 +507,11 @@ void test_real_bigint_add_in_place ( void )
   free_bigint ( d );
   free_bigint ( c );
 
-  b = init_bigint ( -98837 );
   a = init_bigint ( 12345 );
+  b = init_bigint ( -98837 );
   c = init_bigint ( -86492 );
-  bigint_add_in_place ( b, a );
-  ASSERT ( bigint_compare ( b, c ) == 0, "g+a wrong" );
+  bigint_add_in_place ( a, b );
+  ASSERT ( bigint_compare ( a, c ) == 0, "g+a wrong" );
   free_bigint ( a );
   free_bigint ( b );
   free_bigint ( c );
@@ -534,9 +534,9 @@ void test_real_bigint_add_in_place ( void )
   free_bigint ( b );
   free_bigint ( a );
 
-  a = init_bigint ( 2776 );
-  b = init_bigint ( -9234 );
-  c = init_bigint ( -6458 );
+  a = init_bigint ( -2776 );
+  b = init_bigint ( 9234 );
+  c = init_bigint ( 6458 );
   bigint_add_in_place ( a, b );
   ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after add." );
   free_bigint ( c );

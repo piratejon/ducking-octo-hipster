@@ -289,8 +289,8 @@ void bigint_add_in_place ( BigInt * A, BigInt * B )
     if ( B->positive )
     {
       // (-A) + B
-      // positive if |A| < |B|
       // negative if |A| > |B|
+      // positive if |A| < |B|
       if ( bigint_compare_magnitude ( A, B ) > 0 )
       {
         _real_bigint_subtract_in_place ( A, B );
@@ -300,7 +300,6 @@ void bigint_add_in_place ( BigInt * A, BigInt * B )
         BigInt * b_tmp = bigint_copy ( B );
         _real_bigint_subtract_in_place ( b_tmp, A );
         bigint_swap ( b_tmp, A );
-        A->positive = false;
         free_bigint ( b_tmp );
       }
     }
