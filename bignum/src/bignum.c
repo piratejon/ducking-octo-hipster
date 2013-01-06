@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "bignum.h"
 
@@ -383,9 +384,12 @@ BigInt * bigint_multiply ( BigInt * a, BigInt * b )
   BigInt * product, *tmp;
   Bit * current;
 
-  tmp = bigint_copy ( a );
   product = init_bigint_empty ( );
 
+  // if a is equal to zero
+  if ( a->count == 0 ) return product;
+
+  tmp = bigint_copy ( a );
   for ( current = b->lsb; current; current = current->next )
   {
     if ( current->bit )
@@ -399,13 +403,15 @@ BigInt * bigint_multiply ( BigInt * a, BigInt * b )
 
   product->positive = ( a->positive == b->positive );
 
-  return ( product );
+  return product;
 }
 
 BigInt * bigint_div_10 ( BigInt * a )
 {
-  BigInt * r = NULL;
-
+  BigInt * r = init_bigint ( 3 );
+  BigInt * b = init_bigint ( 98765 );
+  bigint_swap ( a, b );
+  free_bigint ( b );
   return r;
 }
 
@@ -513,5 +519,45 @@ void _real_bigint_subtract_in_place ( BigInt * A, BigInt * B )
     single_bit_subtract_in_place ( &(a->bit), false, &borrow );
     a = a->next;
   }
+}
+
+char * find_string_end ( char * str )
+{
+  while ( *str ) str ++;
+  return str-1;
+}
+
+BigInt * init_bigint_from_string ( char * str )
+{
+  char * end;
+  BigInt * a = init_bigint_empty ( );
+  BigInt * place = init_bigint ( 1 );
+  BigInt * ten = init_bigint ( 10 );
+
+  for ( end = find_string_end ( str ); end >= str; -- end )
+  {
+    if ( *end != '-' )
+    {
+      BigInt * current_digit = init_bigint ( (*end) - '0' );
+      BigInt * new_place_value = bigint_multiply ( current_digit, place );
+      free_bigint ( current_digit );
+      bigint_add_in_place ( a, new_place_value );
+      free_bigint ( new_place_value );
+
+      BigInt * new_place = bigint_multiply ( place, ten );
+      bigint_swap ( new_place, place );
+      free_bigint ( new_place );
+    }
+    else
+    {
+      a->positive = false;
+      break;
+    }
+  }
+
+  free_bigint ( place );
+  free_bigint ( ten );
+
+  return a;
 }
 

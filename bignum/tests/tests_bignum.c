@@ -207,24 +207,34 @@ void test_bigint_copy ( void )
 
 void test_bigint_multiply ( void )
 {
-  BigInt * a = init_bigint ( 199 );
-  BigInt * b = init_bigint ( 305 );
-  BigInt * a_x_b = bigint_multiply ( a, b );
-  BigInt * c = init_bigint ( 60695 );
-  BigInt * d = init_bigint ( -60695 );
-  BigInt * e = init_bigint ( -305 );
-  BigInt * f = init_bigint ( 199 );
-  BigInt * e_x_f = bigint_multiply ( e, f );
+  BigInt * a, * b, * c, * a_x_b;
 
-  ASSERT ( bigint_low_dword ( a_x_b ) == 60695, "Multiply failed." );
+  a = init_bigint ( 199 );
+  b = init_bigint ( 305 );
+  c = init_bigint ( 60695 );
+  a_x_b = bigint_multiply ( a, b );
   ASSERT ( bigint_compare ( a_x_b, c ) == 0, "Equality failed after multiply." );
-  ASSERT ( bigint_compare ( e_x_f, d ) == 0, "Equality failed after negative multiply." );
-
-  free_bigint ( e_x_f );
   free_bigint ( a_x_b );
-  free_bigint ( f );
-  free_bigint ( e );
-  free_bigint ( d );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
+
+  a = init_bigint ( -305 );
+  b = init_bigint ( 199 );
+  c = init_bigint ( -60695 );
+  a_x_b = bigint_multiply ( a, b );
+  ASSERT ( bigint_compare ( a_x_b, c ) == 0, "Equality failed after negative multiply." );
+  free_bigint ( a_x_b );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
+
+  a = init_bigint ( 0 );
+  b = init_bigint ( 350 );
+  c = init_bigint ( 0 );
+  a_x_b = bigint_multiply ( a, b );
+  ASSERT ( bigint_compare ( a_x_b, c ) == 0, "failed to multiply by zero" );
+  free_bigint ( a_x_b );
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
@@ -553,6 +563,24 @@ void test_real_bigint_add_in_place ( void )
   free_bigint ( a );
 }
 
+void test_bigint_from_string ( void )
+{
+  BigInt * a = init_bigint_from_string ( "99" );
+  ASSERT ( bigint_low_dword ( a ) == 99 && bigint_positive ( a ), "wrong value from string" );
+  free_bigint ( a );
+
+  a = init_bigint_from_string ( "123456" );
+  ASSERT ( bigint_low_dword ( a ) == 123456 && bigint_positive ( a ), "wrong value from string" );
+  free_bigint ( a );
+
+  a = init_bigint_from_string ( "-12345678900987654321" );
+  ASSERT ( (unsigned int)bigint_low_dword ( a ) == 3697766577, "wrong value" );
+  bigint_shift_right ( a, 32 );
+  ASSERT ( (unsigned int)bigint_low_dword ( a ) == 2874452364, "wrong value" );
+  ASSERT ( a->positive == false, "a has wrong sign" );
+  free_bigint ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
@@ -572,6 +600,7 @@ void do_tests ( void )
   TEST ( test_single_bit_subtract_in_place );
   TEST ( test_single_bit_add_in_place );
   TEST ( test_bigint_subtract );
-  // TEST ( test_bigint_div_10 );
+  TEST ( test_bigint_from_string );
+  TEST ( test_bigint_div_10 );
 }
 
