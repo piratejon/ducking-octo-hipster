@@ -191,64 +191,30 @@ int bigint_compare_magnitude ( BigInt * A, BigInt * B )
   a = A->msb;
   b = B->msb;
 
-  if ( B->count > A->count )
-  {
-    return -bigint_compare ( B, A );
-  }
-  else if ( A->count > B->count )
+  if ( A->count > B->count )
   {
     i = A->count;
     while ( i -- > B->count )
     {
-      if ( a->bit )
-      {
-        if ( A->positive )
-        {
-          return 1;
-        }
-        else
-        {
-          return -1;
-        }
-      }
-      else
-      {
-        a = a->prev;
-      }
+      if ( a->bit ) return 1;
+      a = a->prev;
     }
   }
-  else
+  else if ( B->count > A->count )
   {
-    i = A->count;
-    while ( i -- > 0 )
+    i = B->count;
+    while ( i -- > A->count )
     {
-      // printf("comparing %d with %d (index %d)\n", a->bit, b->bit, i );
-      if ( a->bit > b->bit )
-      {
-        if ( A->positive )
-        {
-          return 1;
-        }
-        else
-        {
-          return -1;
-        }
-      }
-      else if ( b->bit > a->bit )
-      {
-        if ( A->positive )
-        {
-          return -1;
-        }
-        else
-        {
-          return 1;
-        }
-      }
-
-      a = a->prev;
+      if ( b->bit ) return -1;
       b = b->prev;
     }
+  }
+
+  while ( a && b )
+  {
+    if ( a->bit != b->bit ) return a->bit ? 1 : -1;
+    a = a->prev;
+    b = b->prev;
   }
 
   return 0;
@@ -256,10 +222,28 @@ int bigint_compare_magnitude ( BigInt * A, BigInt * B )
 
 int bigint_compare ( BigInt * A, BigInt * B )
 {
-  if ( A->positive && ! B->positive ) return 1;
-  if ( ! A->positive && B->positive ) return -1;
-
-  return bigint_compare_magnitude ( A, B );
+  if ( A->positive )
+  {
+    if ( B->positive )
+    {
+      return bigint_compare_magnitude ( A, B );
+    }
+    else
+    {
+      return 1;
+    }
+  }
+  else
+  {
+    if ( B->positive )
+    {
+      return -1;
+    }
+    else
+    {
+      return bigint_compare_magnitude ( B, A );
+    }
+  }
 }
 
 void single_bit_add_in_place ( bool * a, bool B, bool * carry )
@@ -286,14 +270,18 @@ void bigint_add_in_place ( BigInt * A, BigInt * B )
     else
     {
       // A + (-B)
-      bool result_positive;
-      BigInt * bneg = bigint_copy ( B );
-      bneg->positive = true;
-      result_positive = bigint_compare ( A, bneg ) > 0;
-      _real_bigint_subtract_in_place ( bneg, A );
-      bigint_swap ( bneg, A );
-      free_bigint ( bneg );
-      A->positive = result_positive;
+      if ( bigint_compare_magnitude ( A, B ) > 0 )
+      {
+        _real_bigint_subtract_in_place ( A, B );
+      }
+      else
+      {
+        BigInt * b_tmp = bigint_copy ( B );
+        _real_bigint_subtract_in_place ( b_tmp, A );
+        bigint_swap ( b_tmp, A );
+        A->positive = false;
+        free_bigint ( b_tmp );
+      }
     }
   }
   else
@@ -303,27 +291,18 @@ void bigint_add_in_place ( BigInt * A, BigInt * B )
       // (-A) + B
       // positive if |A| < |B|
       // negative if |A| > |B|
-      bool result_positive;
-      BigInt * a, * b;
-      a = bigint_copy ( A );
-      b = bigint_copy ( B );
-
-      if ( bigint_compare_magnitude ( a, b ) > 0 )
+      if ( bigint_compare_magnitude ( A, B ) > 0 )
       {
-        a->positive = true;
-        _real_bigint_subtract_in_place ( b, a );
-        bigint_swap ( A, b );
+        _real_bigint_subtract_in_place ( A, B );
       }
       else
       {
-        a->positive = true;
-        _real_bigint_subtract_in_place ( a, b );
-        a->positive = false;
-        bigint_swap ( A, a );
+        BigInt * b_tmp = bigint_copy ( B );
+        _real_bigint_subtract_in_place ( b_tmp, A );
+        bigint_swap ( b_tmp, A );
+        A->positive = false;
+        free_bigint ( b_tmp );
       }
-
-      free_bigint ( a );
-      free_bigint ( b );
     }
     else
     {
@@ -495,12 +474,13 @@ void bigint_subtract_in_place ( BigInt * A, BigInt * B )
       }
       else
       {
+        // both are negative
         if ( bigint_compare_magnitude ( A, B ) > 0 )
-        {
+        { // i.e. -100 - -72 = -28
           _real_bigint_subtract_in_place ( A, B );
         }
         else
-        {
+        { // i.e. -100 - -1000 = 900
           BigInt * b = bigint_copy ( B );
           _real_bigint_subtract_in_place ( b, A );
           bigint_swap ( b, A );

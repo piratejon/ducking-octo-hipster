@@ -76,10 +76,23 @@ void test_bigint_compare ( void )
   ASSERT ( bigint_compare ( a, c ) == 0, "cmp(35,35) diff failed" );
   ASSERT ( bigint_compare ( a, d ) > 0, "cmp(35,8) failed" );
   ASSERT ( bigint_compare ( a, g ) > 0, "cmp(35,-3) failed" );
-  ASSERT ( bigint_compare ( a, g ) > 0, "cmp(35,-98765) failed" );
+  ASSERT ( bigint_compare ( a, h ) > 0, "cmp(35,-98765) failed" );
+  ASSERT ( g->positive == false && h->positive == false, "g and h have wrong signs." );
   ASSERT ( bigint_compare ( g, h ) > 0, "cmp(-3,-98765) failed" );
   ASSERT ( bigint_compare ( h, i ) < 0, "cmp(-98765,-12345) failed" );
   ASSERT ( bigint_compare ( h, j ) < 0, "cmp(-98765,98765) failed" );
+
+  ASSERT ( bigint_compare_magnitude ( e, f ) > 0, "mag_cmp(15,14) failed" );
+  ASSERT ( bigint_compare_magnitude ( f, e ) < 0, "mag_cmp(14,15) failed" );
+  ASSERT ( bigint_compare_magnitude ( a, b ) < 0, "mag_cmp(35,46) failed" );
+  ASSERT ( bigint_compare_magnitude ( a, a ) == 0, "mag_cmp(35,35) self failed" );
+  ASSERT ( bigint_compare_magnitude ( a, c ) == 0, "mag_cmp(35,35) diff failed" );
+  ASSERT ( bigint_compare_magnitude ( a, d ) > 0, "mag_cmp(35,8) failed" );
+  ASSERT ( bigint_compare_magnitude ( a, g ) > 0, "mag_cmp(35,-3) failed" );
+  ASSERT ( bigint_compare_magnitude ( a, h ) < 0, "mag_cmp(35,-98765) failed" );
+  ASSERT ( bigint_compare_magnitude ( g, h ) < 0, "mag_cmp(-3,-98765) failed" );
+  ASSERT ( bigint_compare_magnitude ( h, i ) > 0, "mag_cmp(-98765,-12345) failed" );
+  ASSERT ( bigint_compare_magnitude ( h, j ) == 0, "mag_cmp(-98765,98765) failed" );
 
   free_bigint ( j );
   free_bigint ( i );
@@ -310,20 +323,42 @@ void test_real_bigint_subtract_in_place ( void )
 
 void test_bigint_subtract ( void )
 {
-  BigInt * a = init_bigint ( 9999 );
-  BigInt * b = init_bigint ( 3456 );
-  BigInt * c = init_bigint ( 1000000 );
-  BigInt * d = init_bigint ( 6543 );
-  BigInt * e = init_bigint ( -993457 );
+  BigInt * a, * b, * c;
 
+  a = init_bigint ( 9999 );
+  b = init_bigint ( 3456 );
+  c = init_bigint ( 6543 );
   bigint_subtract_in_place ( a, b );
-  ASSERT ( bigint_compare ( a, d ) == 0, "Compare failed after subtract." );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after subtract." );
+  free_bigint ( a );
+  free_bigint ( b );
+  free_bigint ( c );
 
-  bigint_subtract_in_place ( d, c );
-  ASSERT ( bigint_compare ( d, e ) == 0, "Compare failed after subtract." );
+  a = init_bigint ( 6543 );
+  b = init_bigint ( 1000000 );
+  c = init_bigint ( -993457 );
+  bigint_subtract_in_place ( a, b );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after subtract." );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
 
-  free_bigint ( e );
-  free_bigint ( d );
+  a = init_bigint ( -1000000 );
+  b = init_bigint ( 6543 );
+  c = init_bigint ( -1006543 );
+  bigint_subtract_in_place ( a, b );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after subtract." );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
+
+  a = init_bigint ( -1000 );
+  b = init_bigint ( -225 );
+  c = init_bigint ( -775 );
+  ASSERT ( a->positive == false && b->positive == false, "A & B signs failed." );
+  bigint_subtract_in_place ( a, b );
+  ASSERT ( a->positive == false, "A sign failed after subtract." );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after subtract." );
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
@@ -417,40 +452,29 @@ void test_single_bit_add_in_place ( void )
 
 void test_real_bigint_add_in_place ( void )
 {
-  BigInt * a, * b, * c;
+  BigInt * a, * b, * c, * d;
 
   a = init_bigint ( 12345 );
   b = init_bigint ( 98765 );
   c = init_bigint ( 111110 );
-
   _real_bigint_add_in_place ( a, b );
-
   ASSERT ( bigint_compare ( a, c ) == 0, "wrong answer for a+b" );
-
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
 
   BigInt * zero = init_bigint ( 0 );
   BigInt * one = init_bigint ( 1 );
-  BigInt * one_2 = init_bigint ( 1 );
   BigInt * two = init_bigint ( 2 );
   BigInt * three = init_bigint ( 3 );
-  a = init_bigint ( 99 );
-  b = init_bigint ( 365 );
-  c = init_bigint ( 464 );
-  BigInt * d = init_bigint ( 928 );
-
-  bigint_add_in_place ( zero, one );
+  _real_bigint_add_in_place ( zero, one );
   ASSERT ( bigint_compare ( zero, one ) == 0, "failed to add one to zero" );
-
-  bigint_add_in_place ( zero, one_2 );
+  _real_bigint_add_in_place ( zero, one );
   ASSERT ( bigint_compare ( zero, two ) == 0, "failed to add one to one" );
-
   ASSERT ( one->count == 1, "one has the wrong number of bits prior to add" );
   ASSERT ( bigint_low_dword ( one ) == 1, "one has wrong value prior to add" );
   ASSERT ( bigint_low_dword ( two ) == 2, "two has wrong value prior to add" );
-  bigint_add_in_place ( one, two );
+  _real_bigint_add_in_place ( one, two );
   ASSERT ( bigint_low_dword ( one ) != 1, "one unchanged after add" );
   ASSERT ( bigint_low_dword ( two ) == 2, "two has wrong value after add" );
   ASSERT ( two->count == 2, "two has wrong number of bits after add" );
@@ -458,37 +482,66 @@ void test_real_bigint_add_in_place ( void )
   ASSERT ( one->lsb->bit == true, "one lsb wrong after add" );
   ASSERT ( one->lsb->next->bit == true, "one has wrong 2nd bit after add" );
   ASSERT ( bigint_compare ( one, three ) == 0, "failed to add two to one" );
+  free_bigint ( zero );
+  free_bigint ( one );
+  free_bigint ( two );
+  free_bigint ( three );
 
+  a = init_bigint ( 99 );
+  b = init_bigint ( 365 );
+  c = init_bigint ( 464 );
   ASSERT ( bigint_low_dword ( a ) == 99, "a wrong before added." );
   ASSERT ( bigint_low_dword ( b ) == 365, "b wrong before added." );
-  bigint_add_in_place ( a, b );
+  _real_bigint_add_in_place ( a, b );
   ASSERT ( bigint_low_dword ( a ) != 99, "a unchanged by add." );
   ASSERT ( bigint_low_dword ( b ) == 365, "b wrong after added." );
   ASSERT ( bigint_low_dword ( a ) == 464, "Add failed." );
   ASSERT ( bigint_compare ( a, c ) == 0, "Equality failed after add." );
+  free_bigint ( a );
+  free_bigint ( b );
   
-  bigint_add_in_place ( c, c );
+  _real_bigint_add_in_place ( c, c );
   ASSERT ( bigint_low_dword ( c ) == 928, "Self add failed." );
+  d = init_bigint ( 928 );
   ASSERT ( bigint_compare ( c, d ) == 0, "Equality failed after self add." );
-
-  free_bigint ( zero );
-  free_bigint ( one );
-  free_bigint ( one_2 );
-  free_bigint ( two );
-  free_bigint ( three );
   free_bigint ( d );
+  free_bigint ( c );
+
+  b = init_bigint ( -98837 );
+  a = init_bigint ( 12345 );
+  c = init_bigint ( -86492 );
+  bigint_add_in_place ( b, a );
+  ASSERT ( bigint_compare ( b, c ) == 0, "g+a wrong" );
+  free_bigint ( a );
+  free_bigint ( b );
+  free_bigint ( c );
+
+  a = init_bigint ( -1000 );
+  b = init_bigint ( 225 );
+  c = init_bigint ( -775 );
+  bigint_add_in_place ( a, b );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after add." );
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
 
-  BigInt * g = init_bigint ( -98837 );
-  a = init_bigint ( 12345 );
-  BigInt * g_plus_a = init_bigint ( -86492 );
-  bigint_add_in_place ( g, a );
-  ASSERT ( bigint_compare ( g, g_plus_a ) == 0, "g+a wrong" );
+  a = init_bigint ( 1776 );
+  b = init_bigint ( -952 );
+  c = init_bigint ( 824 );
+  bigint_add_in_place ( a, b );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after add." );
+  free_bigint ( c );
+  free_bigint ( b );
   free_bigint ( a );
-  free_bigint ( g );
-  free_bigint ( g_plus_a );
+
+  a = init_bigint ( 2776 );
+  b = init_bigint ( -9234 );
+  c = init_bigint ( -6458 );
+  bigint_add_in_place ( a, b );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after add." );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
 }
 
 void do_tests ( void )

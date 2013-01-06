@@ -24,6 +24,7 @@ void free_bigint ( BigInt * );
 void free_bigint_innards ( BigInt * );
 int bigint_low_dword ( BigInt * );
 int bigint_compare ( BigInt *, BigInt * );
+int bigint_compare_magnitude ( BigInt *, BigInt * );
 void bigint_add_in_place ( BigInt *, BigInt * );
 BigInt * bigint_add ( BigInt *, BigInt * );
 BigInt * bigint_multiply ( BigInt *, BigInt * );
