@@ -542,6 +542,15 @@ void test_real_bigint_add_in_place ( void )
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
+
+  a = init_bigint ( -1209384923 );
+  b = init_bigint ( -862089320 );
+  c = init_bigint ( -2071474243 );
+  bigint_add_in_place ( a, b );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Compare failed after add." );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
 }
 
 void do_tests ( void )
