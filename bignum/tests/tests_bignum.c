@@ -316,11 +316,11 @@ void test_bigint_subtract ( void )
   BigInt * d = init_bigint ( 6543 );
   BigInt * e = init_bigint ( -993457 );
 
-  // bigint_subtract ( a, b );
+  bigint_subtract_in_place ( a, b );
   ASSERT ( bigint_compare ( a, d ) == 0, "Compare failed after subtract." );
 
-  // bigint_subtract ( d, c );
-  // ASSERT ( bigint_compare ( d, e
+  bigint_subtract_in_place ( d, c );
+  ASSERT ( bigint_compare ( d, e ) == 0, "Compare failed after subtract." );
 
   free_bigint ( e );
   free_bigint ( d );
@@ -509,8 +509,7 @@ void do_tests ( void )
   TEST ( test_bigint_multiply );
   TEST ( test_single_bit_subtract_in_place );
   TEST ( test_single_bit_add_in_place );
-  // TEST ( test_bigint_subtract_in_place );
-  // TEST ( test_bigint_subtract );
+  TEST ( test_bigint_subtract );
   // TEST ( test_bigint_div_10 );
 }
 
