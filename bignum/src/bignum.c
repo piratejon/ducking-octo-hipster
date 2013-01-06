@@ -406,15 +406,6 @@ BigInt * bigint_multiply ( BigInt * a, BigInt * b )
   return product;
 }
 
-BigInt * bigint_div_10 ( BigInt * a )
-{
-  BigInt * r = init_bigint ( 3 );
-  BigInt * b = init_bigint ( 98765 );
-  bigint_swap ( a, b );
-  free_bigint ( b );
-  return r;
-}
-
 bool bigint_positive ( BigInt * a )
 {
   return a->positive;
@@ -559,5 +550,12 @@ BigInt * init_bigint_from_string ( char * str )
   free_bigint ( ten );
 
   return a;
+}
+
+BigInt * bigint_divide ( BigInt * divisor, BigInt * dividend, BigInt ** premainder )
+{
+  BigInt * quotient = init_bigint ( 98765 );
+  if ( premainder ) *premainder = init_bigint ( 3 );
+  return quotient;
 }
 

@@ -266,16 +266,20 @@ void test_bigint_pop ( void )
   free_bigint ( a );
 }
 
-void test_bigint_div_10 ( void )
+void test_bigint_divide ( void )
 {
   BigInt * a = init_bigint ( 987653 );
   BigInt * b = init_bigint ( 98765 );
   BigInt * c = init_bigint ( 3 );
-  BigInt * r = bigint_div_10 ( a );
+  BigInt * ten = init_bigint ( 10 );
+  BigInt * q, * r;
+    
+  q = bigint_divide ( a, ten, &r );
+  ASSERT ( bigint_compare ( r, c ) == 0, "Incorrect remainder after division." );
+  ASSERT ( bigint_compare ( q, b ) == 0, "Incorrect quotient after division." );
 
-  ASSERT ( bigint_compare ( a, b ) == 0, "Incorrect quotient after div10." );
-  ASSERT ( bigint_compare ( r, c ) == 0, "Incorrect remainder after div10." );
-
+  free_bigint ( ten );
+  free_bigint ( q );
   free_bigint ( r );
   free_bigint ( c );
   free_bigint ( b );
@@ -601,6 +605,6 @@ void do_tests ( void )
   TEST ( test_single_bit_add_in_place );
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
-  TEST ( test_bigint_div_10 );
+  TEST ( test_bigint_divide );
 }
 

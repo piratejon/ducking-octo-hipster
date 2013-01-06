@@ -35,7 +35,6 @@ bool bigint_pop_lsb ( BigInt * );
 bool bigint_pop_msb ( BigInt * );
 void append_bit ( BigInt *, int );
 void prepend_bit ( BigInt *, int );
-BigInt * bigint_div_10 ( BigInt * );
 bool bigint_positive ( BigInt * );
 void bigint_subtract_in_place ( BigInt *, BigInt * );
 void single_bit_subtract_in_place ( bool *, bool, bool * );
@@ -44,6 +43,7 @@ void _real_bigint_add_in_place ( BigInt *, BigInt * );
 void _real_bigint_subtract_in_place ( BigInt *, BigInt * );
 void bigint_swap ( BigInt *, BigInt * );
 BigInt * init_bigint_from_string ( char * );
+BigInt * bigint_divide ( BigInt *, BigInt *, BigInt ** );
 
 #endif // _BIGNUM_H
 
