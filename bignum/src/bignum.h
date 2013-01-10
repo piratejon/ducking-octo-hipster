@@ -44,6 +44,7 @@ void _real_bigint_subtract_in_place ( BigInt *, BigInt * );
 void bigint_swap ( BigInt *, BigInt * );
 BigInt * init_bigint_from_string ( char * );
 BigInt * bigint_divide ( BigInt *, BigInt *, BigInt ** );
+int bitlist_compare_magnitude_forward ( Bit * , Bit * , int );
 
 #endif // _BIGNUM_H
 

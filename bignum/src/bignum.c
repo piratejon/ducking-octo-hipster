@@ -552,8 +552,31 @@ BigInt * init_bigint_from_string ( char * str )
   return a;
 }
 
-BigInt * bigint_divide ( BigInt * divisor, BigInt * dividend, BigInt ** premainder )
+int bitlist_compare_magnitude_forward ( Bit * msb_a, Bit * msb_b, int count )
 {
+  while ( msb_a && msb_b && count -- )
+  {
+    if ( msb_a->bit && !msb_b->bit ) return 1;
+    if ( !msb_a->bit && msb_b->bit ) return -1;
+
+    msb_a = msb_a->prev;
+    msb_b = msb_b->prev;
+  }
+
+  if ( !msb_a && msb_b ) return -1;
+  if ( msb_a && !msb_b ) return 1;
+
+  return 0;
+}
+
+BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premainder )
+{
+  /*
+  BigInt * quotient = init_bigint ( 1 );
+  if ( premainder ) *premainder = init_bigint ( 0 );
+  return quotient;
+  */
+
   BigInt * quotient = init_bigint ( 98765 );
   if ( premainder ) *premainder = init_bigint ( 3 );
   return quotient;

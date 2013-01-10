@@ -268,6 +268,23 @@ void test_bigint_pop ( void )
 
 void test_bigint_divide ( void )
 {
+  /*
+  BigInt * dividend = init_bigint ( 1 );
+  BigInt * divisor = init_bigint ( 1 );
+  BigInt * zero = init_bigint ( 0 );
+  BigInt * q, * r;
+
+  q = bigint_divide ( dividend, divisor, &r );
+  ASSERT ( bigint_compare ( q, divisor ) == 0, "quotient not one" );
+  ASSERT ( bigint_compare ( r, zero ) == 0, "remainder not zero" );
+
+  free_bigint ( q );
+  free_bigint ( r );
+  free_bigint ( zero );
+  free_bigint ( divisor );
+  free_bigint ( dividend );
+  */
+
   BigInt * a = init_bigint ( 987653 );
   BigInt * b = init_bigint ( 98765 );
   BigInt * c = init_bigint ( 3 );
@@ -585,6 +602,24 @@ void test_bigint_from_string ( void )
   free_bigint ( a );
 }
 
+void test_bitlist_compare_magnitude ( void )
+{
+  BigInt * a = init_bigint ( 127 );
+  BigInt * b = init_bigint ( 126 );
+  BigInt * c = init_bigint ( 63 );
+  BigInt * d = init_bigint ( 64 );
+
+  ASSERT ( bitlist_compare_magnitude_forward ( a->msb, b->msb, 7 ) == 1, "bitlist compare failed" );
+  ASSERT ( bitlist_compare_magnitude_forward ( a->msb, b->msb, 6 ) == 0, "bitlist compare failed" );
+  ASSERT ( bitlist_compare_magnitude_forward ( c->msb, a->msb, 5 ) == 0, "bitlist compare failed" );
+  ASSERT ( bitlist_compare_magnitude_forward ( d->msb, b->msb, 7 ) == -1, "bitlist compare failed" );
+
+  free_bigint ( d );
+  free_bigint ( c );
+  free_bigint ( b );
+  free_bigint ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
@@ -606,5 +641,6 @@ void do_tests ( void )
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
   TEST ( test_bigint_divide );
+  TEST ( test_bitlist_compare_magnitude );
 }
 
