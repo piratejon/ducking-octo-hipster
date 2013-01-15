@@ -13,7 +13,7 @@ void sanity_check_one ( void )
 
 void test_initialize_bignum ( void )
 {
-  BigInt * bi = init_bigint(29);
+  BigInt * bi = init_bigint(29); // 0b11101
   BigInt * a = init_bigint(0);
 
   ASSERT ( bi != NULL, "Failed to allocate BigInt." );
@@ -620,6 +620,60 @@ void test_bitlist_compare_magnitude ( void )
   free_bigint ( a );
 }
 
+void test_bigint_binary_slice ( void )
+{
+  BigInt * a = init_bigint ( 127 );
+  BigInt * b;
+ 
+  b = bigint_binary_slice ( a, 0, 0 );
+  ASSERT ( b->count == 0, "empty slice has wrong count" );
+  ASSERT ( b->lsb == NULL && b->msb == NULL, "empty slice has non-NULL MSB&LSB" );
+  free_bigint ( b );
+
+  b = bigint_binary_slice ( a, 3, 3 );
+  ASSERT ( b->count == 0 && b->lsb == NULL && b->msb == NULL, "empty slice not empty" );
+  free_bigint ( b );
+
+  b = bigint_binary_slice ( a, 0, 1 );
+  ASSERT ( bigint_low_dword ( b ) == 1, "failed to slice 127[0:1]" );
+  free_bigint ( b );
+
+  b = bigint_binary_slice ( a, 5, 7 );
+  ASSERT ( bigint_low_dword ( b ) == 3, "failed to slice 127[5:7]" );
+  free_bigint ( b );
+  free_bigint ( a );
+
+  a = init_bigint ( 1234567890 ); // 0b100 100110010110 0000001011010010
+  b = bigint_binary_slice ( a, 16, 28 );
+  ASSERT ( bigint_low_dword ( b ) == 2454, "failed to slice properly" );
+  free_bigint ( b );
+
+  b = bigint_binary_slice ( a, 16, 9999 );
+  ASSERT ( bigint_low_dword ( b ) == 18838, "failed to curtail slice" );
+  free_bigint ( b );
+  free_bigint ( a );
+}
+
+void test_fast_forward ( void )
+{
+  BigInt * a = init_bigint ( 1245 ); // 0b10011011101
+  Bit * bit = a->lsb;
+
+  ASSERT ( bit->bit == true, "wrong LSB for 1245" );
+  fast_forward ( bit, 0 );
+  ASSERT ( a->lsb == bit, "fast_forward zero changed the bit" );
+  bit = fast_forward ( bit, 1 );
+  ASSERT ( bit->bit == false, "wrong bit-1 for 1245" );
+  bit = fast_forward ( bit, 3 );
+  ASSERT ( bit->bit == true, "wrong bit-5 for 1245" );
+  bit = fast_forward ( bit, 1 );
+  ASSERT ( bit->bit == false, "wrong bit-6 for 1245" );
+  bit = fast_forward ( bit, 27 );
+  ASSERT ( bit == NULL, "1245 has too many bits" );
+
+  free_bigint ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
@@ -640,7 +694,9 @@ void do_tests ( void )
   TEST ( test_single_bit_add_in_place );
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
-  TEST ( test_bigint_divide );
+  TEST ( test_fast_forward );
+  // TEST ( test_bigint_divide );
   TEST ( test_bitlist_compare_magnitude );
+  TEST ( test_bigint_binary_slice );
 }
 

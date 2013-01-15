@@ -33,8 +33,8 @@ void bigint_shift_right ( BigInt *, int );
 void bigint_shift_left ( BigInt *, int );
 bool bigint_pop_lsb ( BigInt * );
 bool bigint_pop_msb ( BigInt * );
-void append_bit ( BigInt *, int );
-void prepend_bit ( BigInt *, int );
+void append_bit ( BigInt *, bool );
+void prepend_bit ( BigInt *, bool );
 bool bigint_positive ( BigInt * );
 void bigint_subtract_in_place ( BigInt *, BigInt * );
 void single_bit_subtract_in_place ( bool *, bool, bool * );
@@ -45,6 +45,8 @@ void bigint_swap ( BigInt *, BigInt * );
 BigInt * init_bigint_from_string ( char * );
 BigInt * bigint_divide ( BigInt *, BigInt *, BigInt ** );
 int bitlist_compare_magnitude_forward ( Bit * , Bit * , int );
+BigInt * bigint_binary_slice ( BigInt *, int, int );
+Bit * fast_forward ( Bit * , int );
 
 #endif // _BIGNUM_H
 
