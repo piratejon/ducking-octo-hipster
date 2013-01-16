@@ -268,7 +268,6 @@ void test_bigint_pop ( void )
 
 void test_bigint_divide ( void )
 {
-  /*
   BigInt * dividend = init_bigint ( 1 );
   BigInt * divisor = init_bigint ( 1 );
   BigInt * zero = init_bigint ( 0 );
@@ -283,8 +282,8 @@ void test_bigint_divide ( void )
   free_bigint ( zero );
   free_bigint ( divisor );
   free_bigint ( dividend );
-  */
 
+  /*
   BigInt * a = init_bigint ( 987653 );
   BigInt * b = init_bigint ( 98765 );
   BigInt * c = init_bigint ( 3 );
@@ -301,6 +300,7 @@ void test_bigint_divide ( void )
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
+  */
 }
 
 void test_real_bigint_subtract_in_place ( void )
@@ -654,22 +654,42 @@ void test_bigint_binary_slice ( void )
   free_bigint ( a );
 }
 
-void test_fast_forward ( void )
+void test_walk_toward_msb ( void )
 {
   BigInt * a = init_bigint ( 1245 ); // 0b10011011101
   Bit * bit = a->lsb;
 
   ASSERT ( bit->bit == true, "wrong LSB for 1245" );
-  fast_forward ( bit, 0 );
-  ASSERT ( a->lsb == bit, "fast_forward zero changed the bit" );
-  bit = fast_forward ( bit, 1 );
+  walk_toward_msb ( bit, 0 );
+  ASSERT ( a->lsb == bit, "walk_toward_msb zero changed the bit" );
+  bit = walk_toward_msb ( bit, 1 );
   ASSERT ( bit->bit == false, "wrong bit-1 for 1245" );
-  bit = fast_forward ( bit, 3 );
+  bit = walk_toward_msb ( bit, 3 );
   ASSERT ( bit->bit == true, "wrong bit-5 for 1245" );
-  bit = fast_forward ( bit, 1 );
+  bit = walk_toward_msb ( bit, 1 );
   ASSERT ( bit->bit == false, "wrong bit-6 for 1245" );
-  bit = fast_forward ( bit, 27 );
+  bit = walk_toward_msb ( bit, 27 );
   ASSERT ( bit == NULL, "1245 has too many bits" );
+
+  free_bigint ( a );
+}
+
+void test_reverse_bits ( void )
+{
+  BigInt * a = init_bigint ( 99999 ); // 0b11000011010011111
+  // 0b11111001011000011
+
+  bigint_reverse_bits ( a );
+  ASSERT ( bigint_low_dword ( a ) == 127683, "failed to reverse bits" );
+  bigint_reverse_bits ( a );
+  ASSERT ( bigint_low_dword ( a ) == 99999, "failed to reverse bits" );
+  bigint_pop_msb ( a );
+  bigint_reverse_bits ( a );
+  ASSERT ( bigint_low_dword ( a ) == 63841, "failed to reverse after pop" );
+  bigint_pop_lsb ( a );
+  bigint_reverse_bits ( a );
+  ASSERT ( bigint_low_dword ( a ) == 1695, "failed to reverse after popping and reversing" );
+  ASSERT ( a->msb->bit == false && a->lsb->bit == true, "wrong bits" );
 
   free_bigint ( a );
 }
@@ -694,8 +714,9 @@ void do_tests ( void )
   TEST ( test_single_bit_add_in_place );
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
-  TEST ( test_fast_forward );
+  TEST ( test_walk_toward_msb );
   // TEST ( test_bigint_divide );
+  TEST ( test_reverse_bits );
   TEST ( test_bitlist_compare_magnitude );
   TEST ( test_bigint_binary_slice );
 }

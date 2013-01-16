@@ -791,9 +791,23 @@ int bitlist_compare_magnitude_forward ( Bit * msb_a, Bit * msb_b, int count )
 ///
 /// @return A pointer to the nth bit after the argument
 ///
-Bit * fast_forward ( Bit * b, int count )
+Bit * walk_toward_msb ( Bit * b, int count )
 {
   while ( b && count -- ) b = b->next;
+  return b;
+}
+
+///
+/// Skip to the nth item toward the LSB
+///
+/// @param b the bit list to retreat through
+/// @param count The number of bits to retreat through
+///
+/// @return A pointer to the nth behind the argument
+///
+Bit * walk_toward_lsb ( Bit * b, int count )
+{
+  while ( b && count -- ) b = b->prev;
   return b;
 }
 
@@ -811,50 +825,19 @@ Bit * fast_forward ( Bit * b, int count )
 ///
 BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premainder )
 {
-  /*
-  BigInt * quotient = init_bigint ( 1 );
-  if ( premainder ) *premainder = init_bigint ( 0 );
-  return quotient;
-  */
+  BigInt * quotient, * remainder;
+  BigInt * dslice;
 
-  BigInt * remainder, * quotient;
-  Bit * x, * y;
-  bool borrow, * remainder_bits, * quotient_bits;
-  int q, r;
-  remainder_bits = malloc((sizeof*remainder)*(divisor->count));
-  quotient_bits = malloc((sizeof*quotient)*(dividend->count - divisor->count + 1));
+  quotient = init_bigint_empty ( );
 
-  while ( q -- )
+  while ( quotient->count < dividend->count - divisor->count + 1 )
   {
-    y = divisor->lsb;
-    if ( bitlist_compare_magnitude_forward ( x, y, divisor->count ) < 0 )
-    {
-      quotient_bits[q] = false;
-      x = fast_forward ( dividend->msb, divisor->count + 1 );
-    }
-    else
-    {
-      quotient_bits[q] = true;
-      x = fast_forward ( dividend->msb, divisor->count );
-    }
-
-    for ( r = 0; r < divisor->count; ++ r )
-    {
-      remainder_bits[r] = x->bit;
-      single_bit_subtract_in_place ( &remainder_bits[r], y->bit, &borrow );
-      x = x->prev;
-      y = y->prev;
-    }
   }
 
-  free ( remainder_bits );
-  free ( quotient_bits );
+  premainder ? *premainder = remainder
+             : free_bigint ( remainder );
 
-    /*
-  BigInt * quotient = init_bigint ( 98765 );
-  if ( premainder ) *premainder = init_bigint ( 3 );
   return quotient;
-  */
 }
 
 ///
@@ -874,13 +857,34 @@ BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premaind
 BigInt * bigint_binary_slice ( BigInt * a, int lsb, int msb )
 {
   BigInt * out = init_bigint_empty ( );
-  Bit * c = fast_forward ( a->lsb, lsb );
+  Bit * c = walk_toward_msb ( a->lsb, lsb );
   out->positive = a->positive;
   while ( c && lsb ++ < msb )
   {
     append_bit ( out, c->bit );
-    c = fast_forward ( c, 1 );
+    c = walk_toward_msb ( c, 1 );
   }
   return out;
+}
+
+///
+/// Reverses the bits in a BigInt. No zeroes are hacked off.
+///
+/// @param bi The BigInt to reverse.
+///
+void bigint_reverse_bits ( BigInt * bi )
+{
+  Bit * next, * a;
+
+  for ( a = bi->lsb; a; a = a->prev )
+  {
+    next = a->next;
+    a->next = a->prev;
+    a->prev = next;
+  }
+
+  next = bi->lsb;
+  bi->lsb = bi->msb;
+  bi->msb = next;
 }
 

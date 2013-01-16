@@ -46,7 +46,9 @@ BigInt * init_bigint_from_string ( char * );
 BigInt * bigint_divide ( BigInt *, BigInt *, BigInt ** );
 int bitlist_compare_magnitude_forward ( Bit * , Bit * , int );
 BigInt * bigint_binary_slice ( BigInt *, int, int );
-Bit * fast_forward ( Bit * , int );
+Bit * walk_toward_msb ( Bit * , int );
+Bit * walk_toward_lsb ( Bit * , int );
+void bigint_reverse_bits ( BigInt * );
 
 #endif // _BIGNUM_H
 
