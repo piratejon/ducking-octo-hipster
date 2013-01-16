@@ -128,7 +128,7 @@ BigInt * bigint_copy ( BigInt * a )
   while ( current )
   {
     append_bit ( b, current->bit );
-    current = current->next;
+    current = walk_toward_msb ( current, 1 );
   }
 
   return b;
@@ -231,10 +231,10 @@ int bigint_slice_bits ( BigInt * bi, int start, int end, int * out )
   for (
       i = start;
       i < end && current && current->next;
-      ++ i, current = current->next
+      ++ i, current = walk_toward_msb ( current, 1 )
       );
 
-  for ( (*out) = 0; current; current = current->prev )
+  for ( (*out) = 0; current; current = walk_toward_lsb ( current, 1 ) )
   {
     (*out) <<= 1;
     (*out) |= current->bit;
@@ -280,7 +280,7 @@ int bigint_compare_magnitude ( BigInt * A, BigInt * B )
     while ( i -- > B->count )
     {
       if ( a->bit ) return 1;
-      a = a->prev;
+      a = walk_toward_lsb ( a, 1 );
     }
   }
   else if ( B->count > A->count )
@@ -289,15 +289,15 @@ int bigint_compare_magnitude ( BigInt * A, BigInt * B )
     while ( i -- > A->count )
     {
       if ( b->bit ) return -1;
-      b = b->prev;
+      b = walk_toward_lsb ( b, 1 );
     }
   }
 
   while ( a && b )
   {
     if ( a->bit != b->bit ) return a->bit ? 1 : -1;
-    a = a->prev;
-    b = b->prev;
+    a = walk_toward_lsb ( a, 1 );
+    b = walk_toward_lsb ( b, 1 );
   }
 
   return 0;
@@ -435,14 +435,14 @@ void _real_bigint_add_in_place ( BigInt * augend, BigInt * addend )
   {
     single_bit_add_in_place ( &(a->bit), b->bit, &carry );
 
-    a = a->next;
-    b = b->next;
+    a = walk_toward_msb ( a, 1 );
+    b = walk_toward_msb ( b, 1 );
   }
 
   while ( a )
   {
     single_bit_add_in_place ( &(a->bit), false, &carry );
-    a = a->next;
+    a = walk_toward_msb ( a, 1 );
   }
 
   while ( b )
@@ -450,7 +450,7 @@ void _real_bigint_add_in_place ( BigInt * augend, BigInt * addend )
     bool A = false;
     single_bit_add_in_place ( &A, b->bit, &carry );
     append_bit ( augend, A );
-    b = b->next;
+    b = walk_toward_msb ( b, 1 );
   }
 
   if ( carry )
@@ -773,8 +773,8 @@ int bitlist_compare_magnitude_forward ( Bit * msb_a, Bit * msb_b, int count )
     if ( msb_a->bit && !msb_b->bit ) return 1;
     if ( !msb_a->bit && msb_b->bit ) return -1;
 
-    msb_a = msb_a->prev;
-    msb_b = msb_b->prev;
+    msb_a = walk_toward_lsb ( msb_a, 1 );
+    msb_b = walk_toward_lsb ( msb_b, 1 );
   }
 
   if ( !msb_a && msb_b ) return -1;
@@ -825,17 +825,38 @@ Bit * walk_toward_lsb ( Bit * b, int count )
 ///
 BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premainder )
 {
-  BigInt * quotient, * remainder;
-  BigInt * dslice;
+  BigInt * quotient, * subby;
+  Bit * dividend_pointer;
 
   quotient = init_bigint_empty ( );
+  subby = init_bigint ( 0 );
+  dividend_pointer = dividend->msb;
 
-  while ( quotient->count < dividend->count - divisor->count + 1 )
+  while ( dividend_pointer )
   {
+    if ( bigint_compare ( subby, divisor ) < 0 )
+    {
+      fprintf(stderr, "0");
+      prepend_bit ( quotient, false );
+      prepend_bit ( subby, dividend_pointer->bit );
+      dividend_pointer = walk_toward_lsb ( dividend_pointer, 1 );
+    }
+    else
+    {
+      fprintf(stderr, "1");
+      prepend_bit ( quotient, true );
+      bigint_subtract_in_place ( subby, divisor );
+    }
   }
 
-  premainder ? *premainder = remainder
-             : free_bigint ( remainder );
+  if ( premainder )
+  {
+    *premainder = subby;
+  }
+  else
+  {
+    free_bigint ( subby );
+  }
 
   return quotient;
 }

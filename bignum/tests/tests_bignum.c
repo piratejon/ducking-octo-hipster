@@ -68,6 +68,10 @@ void test_bigint_compare ( void )
   BigInt * h = init_bigint ( -98765 );
   BigInt * i = init_bigint ( -12345 );
   BigInt * j = init_bigint ( 98765 );
+  BigInt * k = init_bigint ( 987653 );
+  BigInt * l = init_bigint ( 10 );
+
+  ASSERT ( bigint_compare ( k, l ) > 0, "cmp(987653,10) failed" );
 
   ASSERT ( bigint_compare ( e, f ) > 0, "cmp(15,14) failed" );
   ASSERT ( bigint_compare ( f, e ) < 0, "cmp(14,15) failed" );
@@ -94,6 +98,8 @@ void test_bigint_compare ( void )
   ASSERT ( bigint_compare_magnitude ( h, i ) > 0, "mag_cmp(-98765,-12345) failed" );
   ASSERT ( bigint_compare_magnitude ( h, j ) == 0, "mag_cmp(-98765,98765) failed" );
 
+  free_bigint ( l );
+  free_bigint ( k );
   free_bigint ( j );
   free_bigint ( i );
   free_bigint ( h );
@@ -268,6 +274,7 @@ void test_bigint_pop ( void )
 
 void test_bigint_divide ( void )
 {
+  /*
   BigInt * dividend = init_bigint ( 1 );
   BigInt * divisor = init_bigint ( 1 );
   BigInt * zero = init_bigint ( 0 );
@@ -282,13 +289,18 @@ void test_bigint_divide ( void )
   free_bigint ( zero );
   free_bigint ( divisor );
   free_bigint ( dividend );
+  */
 
   /*
   BigInt * a = init_bigint ( 987653 );
   BigInt * b = init_bigint ( 98765 );
   BigInt * c = init_bigint ( 3 );
+  */
+  BigInt * a = init_bigint ( 21 );
+  BigInt * b = init_bigint ( 2 );
+  BigInt * c = init_bigint ( 1 );
   BigInt * ten = init_bigint ( 10 );
-  BigInt * q, * r;
+  BigInt * r, *q;
     
   q = bigint_divide ( a, ten, &r );
   ASSERT ( bigint_compare ( r, c ) == 0, "Incorrect remainder after division." );
@@ -300,7 +312,6 @@ void test_bigint_divide ( void )
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
-  */
 }
 
 void test_real_bigint_subtract_in_place ( void )
@@ -715,7 +726,7 @@ void do_tests ( void )
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
   TEST ( test_walk_toward_msb );
-  // TEST ( test_bigint_divide );
+  TEST ( test_bigint_divide );
   TEST ( test_reverse_bits );
   TEST ( test_bitlist_compare_magnitude );
   TEST ( test_bigint_binary_slice );
