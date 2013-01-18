@@ -705,6 +705,15 @@ void test_reverse_bits ( void )
   free_bigint ( a );
 }
 
+void test_bigint_tostring ( void )
+{
+  BigInt * a = init_bigint ( 12345 );
+  char * astr = bigint_tostring ( a );
+  ASSERT ( strcmp ( astr, "11000000111001" ) == 0, "wrong bits in tostring" );
+  free ( astr );
+  free_bigint ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
@@ -730,5 +739,6 @@ void do_tests ( void )
   TEST ( test_reverse_bits );
   TEST ( test_bitlist_compare_magnitude );
   TEST ( test_bigint_binary_slice );
+  TEST ( test_bigint_tostring );
 }
 

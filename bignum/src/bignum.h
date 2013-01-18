@@ -49,6 +49,7 @@ BigInt * bigint_binary_slice ( BigInt *, int, int );
 Bit * walk_toward_msb ( Bit * , int );
 Bit * walk_toward_lsb ( Bit * , int );
 void bigint_reverse_bits ( BigInt * );
+char * bigint_tostring ( BigInt * );
 
 #endif // _BIGNUM_H
 

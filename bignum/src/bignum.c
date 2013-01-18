@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -907,5 +908,29 @@ void bigint_reverse_bits ( BigInt * bi )
   next = bi->lsb;
   bi->lsb = bi->msb;
   bi->msb = next;
+}
+
+///
+/// Converts a BigInt to a binary string representation
+///
+/// @param bi The BigInt to convert to a string
+///
+/// @return A pointer to the C-string containing the BigInt's string
+/// representation. Must be free()d.
+///
+char * bigint_tostring ( BigInt * bi )
+{
+  char * out = malloc((sizeof*out)*(1+bi->count));
+  int i;
+
+  Bit * bit = bi->msb;
+
+  for ( i = 0, bit = bi->msb; bit; bit = walk_toward_lsb ( bit, 1 ) )
+  {
+    out[i++] = bit->bit ? '1' : '0';
+  }
+  out[i] = '\0';
+
+  return out;
 }
 
