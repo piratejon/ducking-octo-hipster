@@ -435,7 +435,7 @@ void _real_bigint_add_in_place ( BigInt * const augend, BigInt const * const add
 {
   bool carry = false;
 
-  Bit const * a;
+  Bit * a;
   Bit const * b;
 
   a = augend->lsb;
@@ -445,14 +445,14 @@ void _real_bigint_add_in_place ( BigInt * const augend, BigInt const * const add
   {
     single_bit_add_in_place ( &(a->bit), b->bit, &carry );
 
-    a = walk_toward_msb ( a, 1 );
+    a = a->next; // SNEAK AROUND FOR CONST CORRECTNESS
     b = walk_toward_msb ( b, 1 );
   }
 
   while ( a )
   {
     single_bit_add_in_place ( &(a->bit), false, &carry );
-    a = walk_toward_msb ( a, 1 );
+    a = a->next; // SNEAK AROUND FOR CONST CORRECTNESS
   }
 
   while ( b )
