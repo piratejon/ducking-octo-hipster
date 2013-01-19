@@ -47,6 +47,7 @@ char * bigint_tostring_base2 ( BigInt const * const );
 char * bigint_tostring_base10 ( BigInt const * const );
 BigInt * bigint_init_empty ( );
 int bigint_slice_bits ( BigInt const * const, int const, int const, int * const );
+BigInt * bigint_modulo ( BigInt const * const, BigInt const * const );
 
 /**
   * These are considered private. Please don't use them!

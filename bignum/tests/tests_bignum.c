@@ -820,6 +820,20 @@ void test_bigint_tostring_base10 ( void )
   bigint_free ( e );
 }
 
+void test_bigint_modulo ( void )
+{
+  BigInt * a = bigint_init ( 9876543 );
+  BigInt * b = bigint_init ( 12345 );
+
+  BigInt * remainder = bigint_modulo ( a, b );
+
+  ASSERT ( bigint_low_dword ( remainder ) == 543, "wrong remainder" );
+
+  bigint_free ( remainder );
+  bigint_free ( b );
+  bigint_free ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
@@ -849,5 +863,6 @@ void do_tests ( void )
   TEST ( test_append );
   TEST ( test_bigint_remove_high_zeroes );
   TEST ( test_bigint_tostring_base10 );
+  TEST ( test_bigint_modulo );
 }
 

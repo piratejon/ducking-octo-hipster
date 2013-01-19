@@ -1026,3 +1026,21 @@ char * bigint_tostring_base10 ( BigInt const * const bi )
   return out;
 }
 
+///
+/// Returns the remainder of long division of the first operand by the second,
+/// regardless of sign.
+///
+/// @param dividend The number being divided.
+/// @param divisor The number dividing.
+///
+/// @return The remainder of division of the operands.
+///
+BigInt * bigint_modulo ( BigInt const * const dividend, BigInt const * const divisor )
+{
+  BigInt * remainder;
+
+  bigint_free ( bigint_divide ( dividend, divisor, &remainder ) );
+
+  return remainder;
+}
+
