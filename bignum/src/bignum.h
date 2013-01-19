@@ -45,7 +45,7 @@ int bitlist_compare_magnitude_forward ( Bit const * const, Bit const * const, in
 BigInt * bigint_binary_slice ( BigInt const * const, int const, int const );
 char * bigint_tostring_base2 ( BigInt const * const );
 char * bigint_tostring_base10 ( BigInt const * const );
-BigInt * bigint_init_empty ( );
+/*@out@*/ BigInt * bigint_init_empty ( void );
 int bigint_slice_bits ( BigInt const * const, int const, int const, int * const );
 BigInt * bigint_modulo ( BigInt const * const, BigInt const * const );
 

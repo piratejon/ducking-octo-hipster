@@ -4,22 +4,26 @@
 
 #include "bignum.h"
 
+/*@out@*/ void * smalloc ( size_t t )
+{
+  void * x = malloc ( t );
+  if ( x ) return x;
+  else exit(EXIT_FAILURE);
+}
+
 ///
 /// Initializes a BigInt with no bits (equivalent to zero).
 ///
 /// @return A pointer to a newly-initialized empty BigInt. Must be freed with
 /// bigint_free().
 ///
-/*@null@*/ BigInt * bigint_init_empty ( void )
+/*@out@*/ BigInt * bigint_init_empty ( void )
 {
-  BigInt * b = malloc(sizeof*b);
+  BigInt * b = smalloc(sizeof*b);
 
-  if ( b )
-  {
-    b->count = 0;
-    b->msb = b->lsb = NULL;
-    b->positive = true;
-  }
+  b->count = 0;
+  b->msb = b->lsb = NULL;
+  b->positive = true;
 
   return b;
 }
@@ -92,7 +96,7 @@ bool bigint_pop_lsb ( BigInt * const bi )
 ///
 void append_bit ( BigInt * const bi, bool const b )
 {
-  Bit * bit = malloc(sizeof*bit);
+  Bit * bit = smalloc(sizeof*bit);
 
   bi->count ++;
 
@@ -144,7 +148,7 @@ BigInt * bigint_copy ( BigInt const * const a )
 ///
 void prepend_bit ( BigInt * const bi, bool b )
 {
-  Bit * bit = malloc(sizeof*bit);
+  Bit * bit = smalloc(sizeof*bit);
 
   bit->bit = b;
   bi->count ++;
@@ -932,7 +936,7 @@ void _bigint_reverse_bits ( BigInt * const bi )
 ///
 char * bigint_tostring_base2 ( BigInt const * const bi )
 {
-  char * out = malloc((sizeof*out)*(1+bi->count));
+  char * out = smalloc((sizeof*out)*(1+bi->count));
   int i;
 
   Bit const * bit = bi->msb;
@@ -977,7 +981,7 @@ int _bigint_remove_high_zeroes ( BigInt * const bi )
 char * bigint_tostring_base10 ( BigInt const * const bi )
 {
   int index = 0, len;
-  char * out = malloc ( (sizeof*out)*(bi->count+2) );
+  char * out = smalloc ( (sizeof*out)*(bi->count+2) );
   char const * const chars = "0123456789";
 
   BigInt * running_quotient, * remainder, * divisor, * zero;
