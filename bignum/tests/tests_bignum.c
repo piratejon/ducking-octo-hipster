@@ -768,10 +768,10 @@ void test_reverse_bits ( void )
   bigint_free ( a );
 }
 
-void test_bigint_tostring ( void )
+void test_bigint_tostring_base2 ( void )
 {
   BigInt * a = bigint_init ( 12345 );
-  char * astr = bigint_tostring ( a );
+  char * astr = bigint_tostring_base2 ( a );
   ASSERT ( strcmp ( astr, "11000000111001" ) == 0, "wrong bits in tostring" );
   free ( astr );
   bigint_free ( a );
@@ -790,6 +790,26 @@ void test_bigint_remove_high_zeroes ( void )
   ASSERT ( bigint_low_dword ( a ) == 1, "wrong value post-remove-high-zeroes" );
 
   bigint_free ( a );
+}
+
+void test_bigint_tostring_base10 ( void )
+{
+  BigInt * a = bigint_init ( 1234567890 );
+  BigInt * b = bigint_init ( 987654321 );
+
+  BigInt * c = bigint_multiply ( a, b );
+  BigInt * d = bigint_multiply ( c, c );
+  BigInt * e = bigint_multiply ( d, a );
+
+  char * str_e = bigint_tostring_base10 ( e );
+
+  ASSERT ( strcmp ( str_e, "1835502024043843823994724592915000791778829000" ) == 0, "wrong base 10 value for 1835502024043843823994724592915000791778829000" );
+
+  bigint_free ( a );
+  bigint_free ( b );
+  bigint_free ( c );
+  bigint_free ( d );
+  bigint_free ( e );
 }
 
 void do_tests ( void )
@@ -817,8 +837,9 @@ void do_tests ( void )
   TEST ( test_reverse_bits );
   TEST ( test_bitlist_compare_magnitude );
   TEST ( test_bigint_binary_slice );
-  TEST ( test_bigint_tostring );
+  TEST ( test_bigint_tostring_base2 );
   TEST ( test_append );
   TEST ( test_bigint_remove_high_zeroes );
+  TEST ( test_bigint_tostring_base10 );
 }
 

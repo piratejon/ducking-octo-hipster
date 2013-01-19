@@ -43,7 +43,8 @@ BigInt * bigint_init_from_string ( char const * const );
 BigInt * bigint_divide ( BigInt const * const, BigInt const * const, BigInt ** );
 int bitlist_compare_magnitude_forward ( Bit const * const, Bit const * const, int );
 BigInt * bigint_binary_slice ( BigInt const * const, int const, int const );
-char * bigint_tostring ( BigInt const * const );
+char * bigint_tostring_base2 ( BigInt const * const );
+char * bigint_tostring_base10 ( BigInt const * const );
 BigInt * bigint_init_empty ( );
 int bigint_slice_bits ( BigInt const * const, int const, int const, int * const );
 

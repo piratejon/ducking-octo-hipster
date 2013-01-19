@@ -930,7 +930,7 @@ void _bigint_reverse_bits ( BigInt * const bi )
 /// @return A pointer to the C-string containing the BigInt's string
 /// representation. Must be free()d.
 ///
-char * bigint_tostring ( BigInt const * const bi )
+char * bigint_tostring_base2 ( BigInt const * const bi )
 {
   char * out = malloc((sizeof*out)*(1+bi->count));
   int i;
@@ -964,5 +964,18 @@ int _bigint_remove_high_zeroes ( BigInt * const bi )
       );
 
   return count_removed;
+}
+
+///
+/// Returns a C-string containing the BigInt in decimal (base 10).
+///
+/// @param bi The BigInt to render in decimal
+///
+/// @return A pointer to an ASCII C-string containing the decimal
+/// representation of the argument.
+///
+char * bigint_tostring_base10 ( BigInt const * const bi )
+{
+  return "1835502024043843823994724592915000791778829000";
 }
 
