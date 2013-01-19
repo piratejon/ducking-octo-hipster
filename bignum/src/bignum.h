@@ -19,7 +19,7 @@ typedef struct _tag_bigint
   Bit * lsb, * msb;
 } BigInt;
 
-BigInt * init_bigint ( int );
+BigInt * bigint_init ( int );
 void free_bigint ( BigInt * );
 void free_bigint_innards ( BigInt * );
 int bigint_low_dword ( BigInt * );
@@ -42,7 +42,7 @@ void single_bit_add_in_place ( bool *, bool, bool * );
 void _real_bigint_add_in_place ( BigInt *, BigInt * );
 void _real_bigint_subtract_in_place ( BigInt *, BigInt * );
 void bigint_swap ( BigInt *, BigInt * );
-BigInt * init_bigint_from_string ( char * );
+BigInt * bigint_init_from_string ( char * );
 BigInt * bigint_divide ( BigInt *, BigInt *, BigInt ** );
 int bitlist_compare_magnitude_forward ( Bit * , Bit * , int );
 BigInt * bigint_binary_slice ( BigInt *, int, int );
@@ -50,7 +50,7 @@ Bit * walk_toward_msb ( Bit * , int );
 Bit * walk_toward_lsb ( Bit * , int );
 void bigint_reverse_bits ( BigInt * );
 char * bigint_tostring ( BigInt * );
-BigInt * init_bigint_empty ( );
+BigInt * bigint_init_empty ( );
 
 #endif // _BIGNUM_H
 

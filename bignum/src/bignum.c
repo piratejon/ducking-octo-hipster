@@ -10,7 +10,7 @@
 /// @return A pointer to a newly-initialized empty BigInt. Must be freed with
 /// free_bigint().
 ///
-/*@null@*/ BigInt * init_bigint_empty ( void )
+/*@null@*/ BigInt * bigint_init_empty ( void )
 {
   BigInt * b = malloc(sizeof*b);
 
@@ -121,7 +121,7 @@ void append_bit ( BigInt * bi, bool b )
 /// 
 BigInt * bigint_copy ( BigInt * a )
 {
-  BigInt * b = init_bigint_empty ( );
+  BigInt * b = bigint_init_empty ( );
 
   b->positive = a->positive;
   Bit * current = a->lsb;
@@ -164,9 +164,9 @@ void prepend_bit ( BigInt * bi, bool b )
 ///
 /// @param i The value of the new BigInt object.
 ///
-BigInt * init_bigint ( int i )
+BigInt * bigint_init ( int i )
 {
-  BigInt * bi = init_bigint_empty ( );
+  BigInt * bi = bigint_init_empty ( );
 
   if ( i < 0 )
   {
@@ -185,7 +185,7 @@ BigInt * init_bigint ( int i )
 
 ///
 /// Frees a BigInt's internal linked list and resets values to zero/NULL as if
-/// it had just been returned by init_bigint_empty()
+/// it had just been returned by bigint_init_empty()
 ///
 /// @param bi The BigInt being reset.
 ///
@@ -534,7 +534,7 @@ BigInt * bigint_multiply ( BigInt * a, BigInt * b )
   BigInt * product, *tmp;
   Bit * current;
 
-  product = init_bigint_empty ( );
+  product = bigint_init_empty ( );
 
   // if a is equal to zero
   if ( a->count == 0 ) return product;
@@ -715,26 +715,26 @@ char * find_string_end ( char * str )
 
 ///
 /// Create a BigInt from a C-string describing a decimal integer value. This
-/// is meant to overcome limits on the argument to init_bigint(). In fact there
-/// is otherwise intended to be no difference between init_bigint_from_string
-/// and init_bigint
+/// is meant to overcome limits on the argument to bigint_init(). In fact there
+/// is otherwise intended to be no difference between bigint_init_from_string
+/// and bigint_init
 ///
 /// @param str C-string describing a decimal integer value
 ///
 /// @return A new BigInt whose value is equal to the argument's
 ///
-BigInt * init_bigint_from_string ( char * str )
+BigInt * bigint_init_from_string ( char * str )
 {
   char * end;
-  BigInt * a = init_bigint_empty ( );
-  BigInt * place = init_bigint ( 1 );
-  BigInt * ten = init_bigint ( 10 );
+  BigInt * a = bigint_init_empty ( );
+  BigInt * place = bigint_init ( 1 );
+  BigInt * ten = bigint_init ( 10 );
 
   for ( end = find_string_end ( str ); end >= str; -- end )
   {
     if ( *end != '-' )
     {
-      BigInt * current_digit = init_bigint ( (*end) - '0' );
+      BigInt * current_digit = bigint_init ( (*end) - '0' );
       BigInt * new_place_value = bigint_multiply ( current_digit, place );
       free_bigint ( current_digit );
       bigint_add_in_place ( a, new_place_value );
@@ -831,8 +831,8 @@ BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premaind
   char * divisor_str = bigint_tostring ( divisor );;
   char * subby_str;
 
-  quotient = init_bigint_empty ( );
-  subby = init_bigint ( 0 );
+  quotient = bigint_init_empty ( );
+  subby = bigint_init ( 0 );
   dividend_pointer = dividend->msb;
 
   while ( dividend_pointer )
@@ -887,7 +887,7 @@ BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premaind
 ///
 BigInt * bigint_binary_slice ( BigInt * a, int lsb, int msb )
 {
-  BigInt * out = init_bigint_empty ( );
+  BigInt * out = bigint_init_empty ( );
   Bit * c = walk_toward_msb ( a->lsb, lsb );
   out->positive = a->positive;
   while ( c && lsb ++ < msb )
