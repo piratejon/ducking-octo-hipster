@@ -127,9 +127,9 @@ void append_bit ( BigInt * const bi, bool const b )
 BigInt * bigint_copy ( BigInt const * const a )
 {
   BigInt * b = bigint_init_empty ( );
+  Bit const * current = a->lsb;
 
   b->positive = a->positive;
-  Bit const * current = a->lsb;
 
   while ( current )
   {
@@ -748,13 +748,16 @@ BigInt * bigint_init_from_string ( char const * const str )
   {
     if ( *end != '-' )
     {
-      BigInt * current_digit = bigint_init ( (*end) - '0' );
-      BigInt * new_place_value = bigint_multiply ( current_digit, place );
+      BigInt * current_digit, * new_place, * new_place_value;
+
+      current_digit = bigint_init ( (*end) - '0' );
+      new_place_value = bigint_multiply ( current_digit, place );
+
       bigint_free ( current_digit );
       bigint_add_in_place ( a, new_place_value );
       bigint_free ( new_place_value );
 
-      BigInt * new_place = bigint_multiply ( place, ten );
+      new_place = bigint_multiply ( place, ten );
       bigint_swap ( new_place, place );
       bigint_free ( new_place );
     }
