@@ -800,11 +800,19 @@ void test_bigint_tostring_base10 ( void )
   BigInt * c = bigint_multiply ( a, b );
   BigInt * d = bigint_multiply ( c, c );
   BigInt * e = bigint_multiply ( d, a );
+  BigInt * ten = bigint_init ( -10 );
+  BigInt * f = bigint_multiply ( e, ten );
 
-  char * str_e = bigint_tostring_base10 ( e );
+  char * str_e = bigint_tostring_base10 ( f );
+  ASSERT ( strcmp ( str_e, "-18355020240438438239947245929150007917788290000" ) == 0, "wrong base 10 value for -18355020240438438239947245929150007917788290000" );
+  free ( str_e );
 
+  str_e = bigint_tostring_base10 ( e );
   ASSERT ( strcmp ( str_e, "1835502024043843823994724592915000791778829000" ) == 0, "wrong base 10 value for 1835502024043843823994724592915000791778829000" );
+  free ( str_e );
 
+  bigint_free ( ten );
+  bigint_free ( f );
   bigint_free ( a );
   bigint_free ( b );
   bigint_free ( c );

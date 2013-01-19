@@ -976,6 +976,53 @@ int _bigint_remove_high_zeroes ( BigInt * const bi )
 ///
 char * bigint_tostring_base10 ( BigInt const * const bi )
 {
-  return "1835502024043843823994724592915000791778829000";
+  int index = 0, len;
+  char * out = malloc ( (sizeof*out)*(bi->count+2) );
+  char const * const chars = "0123456789";
+
+  BigInt * running_quotient, * remainder, * divisor, * zero;
+
+  running_quotient = bigint_copy ( bi );
+  divisor = bigint_init ( 10 );
+  zero = bigint_init ( 0 );
+
+  if ( !bi->positive )
+  {
+    out[0] = '-';
+    out ++;
+  }
+
+  while ( bigint_compare_magnitude ( running_quotient, zero ) > 0 )
+  {
+    BigInt * tmp = bigint_divide ( running_quotient, divisor, &remainder );
+    bigint_swap ( tmp, running_quotient );
+    bigint_free ( tmp );
+    out[index++] = chars[bigint_low_dword(remainder)];
+    bigint_free ( remainder );
+  }
+
+  bigint_free ( running_quotient );
+  bigint_free ( divisor );
+  bigint_free ( zero );
+
+  len = index;
+
+  for ( index = 0; index < (len/2); ++ index )
+  {
+    char t = out[index];
+    out[index] = out[len-index-1];
+    out[len-index-1] = t;
+  }
+
+  if ( !bi->positive )
+  {
+    out --;
+    len ++;
+  }
+
+  out = realloc ( out, (sizeof*out)*(len+1) );
+  out[len] = '\0';
+
+  return out;
 }
 
