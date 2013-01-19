@@ -720,15 +720,15 @@ void test_reverse_bits ( void )
   BigInt * a = bigint_init ( 99999 ); // 0b11000011010011111
   // 0b11111001011000011
 
-  bigint_reverse_bits ( a );
+  _bigint_reverse_bits ( a );
   ASSERT ( bigint_low_dword ( a ) == 127683, "failed to reverse bits" );
-  bigint_reverse_bits ( a );
+  _bigint_reverse_bits ( a );
   ASSERT ( bigint_low_dword ( a ) == 99999, "failed to reverse bits" );
   bigint_pop_msb ( a );
-  bigint_reverse_bits ( a );
+  _bigint_reverse_bits ( a );
   ASSERT ( bigint_low_dword ( a ) == 63841, "failed to reverse after pop" );
   bigint_pop_lsb ( a );
-  bigint_reverse_bits ( a );
+  _bigint_reverse_bits ( a );
   ASSERT ( bigint_low_dword ( a ) == 1695, "failed to reverse after popping and reversing" );
   ASSERT ( a->msb->bit == false && a->lsb->bit == true, "wrong bits" );
 

@@ -903,7 +903,7 @@ BigInt * bigint_binary_slice ( BigInt * a, int lsb, int msb )
 ///
 /// @param bi The BigInt to reverse.
 ///
-void bigint_reverse_bits ( BigInt * bi )
+void _bigint_reverse_bits ( BigInt * bi )
 {
   Bit * next, * a;
 
