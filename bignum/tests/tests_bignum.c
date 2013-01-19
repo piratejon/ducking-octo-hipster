@@ -325,12 +325,13 @@ void test_bigint_divide ( void )
   BigInt * ten = bigint_init ( 10 );
   q = bigint_divide ( a, ten, &r );
   ASSERT ( bigint_compare ( q, b ) == 0, "wrong quotient" );
-  ASSERT ( bigint_compare ( r, c )  == 3, "wrong remainder" );
+  ASSERT ( bigint_compare ( r, c )  == 0, "wrong remainder" );
 
   bigint_free ( a );
   bigint_free ( b );
   bigint_free ( c );
   bigint_free ( r );
+  bigint_free ( q );
 
   a = bigint_init ( 21 );
   b = bigint_init ( 2 );
@@ -346,6 +347,19 @@ void test_bigint_divide ( void )
   bigint_free ( c );
   bigint_free ( b );
   bigint_free ( a );
+
+  a = bigint_init ( 0 );
+  b = bigint_init ( 99 );
+  c = bigint_init ( 99 );
+  q = bigint_divide ( a, b, &r );
+  ASSERT ( bigint_compare ( r, c ) == 0, "Incorrect remainder after division of zero." );
+  ASSERT ( bigint_compare ( a, q ) == 0, "Incorrect quotient after division of zero." );
+
+  bigint_free ( a );
+  bigint_free ( b );
+  bigint_free ( c );
+  bigint_free ( q );
+  bigint_free ( r );
 }
 
 void test_real_bigint_subtract_in_place ( void )
@@ -765,21 +779,16 @@ void test_bigint_tostring ( void )
 
 void test_bigint_remove_high_zeroes ( void )
 {
-  BigInt * a = bigint_init ( 126 );
-  BigInt * b = bigint_init ( 127 );
-  char * lol, * h4x;
+  BigInt * a = bigint_init ( 129 );
 
-  bigint_subtract_in_place ( a, b );
+  ASSERT ( bigint_low_dword ( a ) == 129, "wrong value" );
+  a->msb->bit = false;
+  ASSERT ( bigint_low_dword ( a ) == 1 && a->count == 8, "wrong count and value post-msb-reset" );
   
-  lol = bigint_tostring ( a );
-  h4x = bigint_tostring ( b );
-  fprintf(stderr, "lol: '%s', %d\nh4x: '%s', %d\n", lol, a->count, h4x, b->count );
-  free ( lol );
-  free ( h4x );
+  ASSERT ( _bigint_remove_high_zeroes ( a ) == 7, "removed wrong number of bits" );
+  ASSERT ( a->count == 1, "wrong count post-remove-high-zeroes" );
+  ASSERT ( bigint_low_dword ( a ) == 1, "wrong value post-remove-high-zeroes" );
 
-  // ASSERT ( a->count == 6 && a->msb->bit == false, "weird" );
-
-  bigint_free ( b );
   bigint_free ( a );
 }
 
@@ -804,7 +813,7 @@ void do_tests ( void )
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
   TEST ( test_walk_toward_msb );
-  // TEST ( test_bigint_divide );
+  TEST ( test_bigint_divide );
   TEST ( test_reverse_bits );
   TEST ( test_bitlist_compare_magnitude );
   TEST ( test_bigint_binary_slice );

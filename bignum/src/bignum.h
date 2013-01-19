@@ -59,6 +59,7 @@ void _real_bigint_add_in_place ( BigInt * const, BigInt const * const );
 void _real_bigint_subtract_in_place ( BigInt * const, BigInt const * const );
 Bit const * walk_toward_msb ( Bit const *, int );
 Bit const * walk_toward_lsb ( Bit const *, int );
+int _bigint_remove_high_zeroes ( BigInt * const );
 
 #endif // _BIGNUM_H
 

@@ -48,6 +48,7 @@ bool bigint_pop_msb ( BigInt * const bi )
 
     free ( bi->msb );
     bi->msb = new_msb;
+    bi->count --;
   }
 
   return out;
@@ -837,51 +838,38 @@ BigInt * bigint_divide ( BigInt const * const dividend, BigInt const * const div
 {
   BigInt * quotient, * subby;
   Bit const * dividend_pointer;
-  char * subby_str, * divisor_str;
-
-  divisor_str = bigint_tostring ( divisor );
-  subby_str = bigint_tostring ( dividend );
-  fprintf( stderr, "Dividing '%s' by '%s'\n", subby_str, divisor_str );
-  free ( subby_str );
 
   quotient = bigint_init_empty ( );
-  subby = bigint_init_empty ( );
 
   dividend_pointer = dividend->msb;
-  prepend_bit ( subby, dividend_pointer->bit );
-  dividend_pointer = walk_toward_lsb ( dividend_pointer, 1 );
 
-  do
+  if ( dividend_pointer )
   {
-    subby_str = bigint_tostring ( subby );
-    fprintf ( stderr, "comparing '%s' with '%s': ", subby_str, divisor_str );
-    free ( subby_str );
-    if ( bigint_compare ( subby, divisor ) < 0 )
+    subby = bigint_init_empty ( );
+    do
     {
-      fprintf ( stderr, "0\n" );
-      prepend_bit ( quotient, false );
       prepend_bit ( subby, dividend_pointer->bit );
       dividend_pointer = walk_toward_lsb ( dividend_pointer, 1 );
-    }
-    else
-    {
-      fprintf ( stderr, "1\n" );
-      prepend_bit ( quotient, true );
-      bigint_subtract_in_place ( subby, divisor );
-    }
-  }
-  while ( dividend_pointer );
 
-  free ( divisor_str );
-
-  if ( premainder )
-  {
-    *premainder = subby;
+      if ( bigint_compare ( subby, divisor ) < 0 )
+      {
+        prepend_bit ( quotient, false );
+      }
+      else
+      {
+        prepend_bit ( quotient, true );
+        _real_bigint_subtract_in_place ( subby, divisor );
+      }
+    }
+    while ( dividend_pointer );
   }
   else
   {
-    bigint_free ( subby );
+    subby = bigint_copy ( divisor );
   }
+
+  premainder ? *premainder = subby
+             : bigint_free ( subby );
 
   return quotient;
 }
