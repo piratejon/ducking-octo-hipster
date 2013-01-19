@@ -8,7 +8,7 @@
 /// Initializes a BigInt with no bits (equivalent to zero).
 ///
 /// @return A pointer to a newly-initialized empty BigInt. Must be freed with
-/// free_bigint().
+/// bigint_free().
 ///
 /*@null@*/ BigInt * bigint_init_empty ( void )
 {
@@ -117,7 +117,7 @@ void append_bit ( BigInt * bi, bool b )
 /// @param a The BigInt to copy.
 ///
 /// @return A pointer to a new BigInt with the same value as the parameter.
-/// This is a separate copy and must be freed with free_bigint().
+/// This is a separate copy and must be freed with bigint_free().
 /// 
 BigInt * bigint_copy ( BigInt * a )
 {
@@ -189,7 +189,7 @@ BigInt * bigint_init ( int i )
 ///
 /// @param bi The BigInt being reset.
 ///
-void free_bigint_innards ( BigInt * bi )
+void bigint_free_innards ( BigInt * bi )
 {
   Bit * next;
   while ( bi->lsb )
@@ -208,9 +208,9 @@ void free_bigint_innards ( BigInt * bi )
 ///
 /// @param bi The BigInt being freed.
 ///
-void free_bigint ( BigInt * bi )
+void bigint_free ( BigInt * bi )
 {
-  if ( bi ) free_bigint_innards ( bi );
+  if ( bi ) bigint_free_innards ( bi );
   free ( bi );
 }
 
@@ -389,7 +389,7 @@ void bigint_add_in_place ( BigInt * A, BigInt * B )
         _real_bigint_subtract_in_place ( b_tmp, A );
         bigint_swap ( b_tmp, A );
         A->positive = false;
-        free_bigint ( b_tmp );
+        bigint_free ( b_tmp );
       }
     }
   }
@@ -409,7 +409,7 @@ void bigint_add_in_place ( BigInt * A, BigInt * B )
         BigInt * b_tmp = bigint_copy ( B );
         _real_bigint_subtract_in_place ( b_tmp, A );
         bigint_swap ( b_tmp, A );
-        free_bigint ( b_tmp );
+        bigint_free ( b_tmp );
       }
     }
     else
@@ -526,7 +526,7 @@ void bigint_swap ( BigInt * a, BigInt * b )
 /// @param b Another multiplicand
 ///
 /// @return A new BigInt containing the product of a and b. Must be freed with
-/// free_bigint()
+/// bigint_free()
 ///
 BigInt * bigint_multiply ( BigInt * a, BigInt * b )
 {
@@ -549,7 +549,7 @@ BigInt * bigint_multiply ( BigInt * a, BigInt * b )
     bigint_shift_left ( tmp, 1 );
   }
 
-  free_bigint ( tmp );
+  bigint_free ( tmp );
 
   product->positive = ( a->positive == b->positive );
 
@@ -576,7 +576,7 @@ bool bigint_positive ( BigInt * a )
 /// @param b Second addend
 ///
 /// @return New BigInt whose value is the sum of first and second addend; must
-/// be freed with free_bigint()
+/// be freed with bigint_free()
 ///
 BigInt * bigint_add ( BigInt * a, BigInt * b )
 {
@@ -617,7 +617,7 @@ void bigint_subtract_in_place ( BigInt * A, BigInt * B )
 {
   if ( A == B || bigint_compare ( A, B ) == 0 )
   {
-    free_bigint_innards ( A );
+    bigint_free_innards ( A );
   }
   else
   {
@@ -635,7 +635,7 @@ void bigint_subtract_in_place ( BigInt * A, BigInt * B )
           _real_bigint_subtract_in_place ( b, A );
           bigint_swap ( b, A );
           A->positive = false;
-          free_bigint ( b );
+          bigint_free ( b );
         }
       }
       else
@@ -662,7 +662,7 @@ void bigint_subtract_in_place ( BigInt * A, BigInt * B )
           _real_bigint_subtract_in_place ( b, A );
           bigint_swap ( b, A );
           A->positive = true;
-          free_bigint ( b );
+          bigint_free ( b );
         }
       }
     }
@@ -736,13 +736,13 @@ BigInt * bigint_init_from_string ( char * str )
     {
       BigInt * current_digit = bigint_init ( (*end) - '0' );
       BigInt * new_place_value = bigint_multiply ( current_digit, place );
-      free_bigint ( current_digit );
+      bigint_free ( current_digit );
       bigint_add_in_place ( a, new_place_value );
-      free_bigint ( new_place_value );
+      bigint_free ( new_place_value );
 
       BigInt * new_place = bigint_multiply ( place, ten );
       bigint_swap ( new_place, place );
-      free_bigint ( new_place );
+      bigint_free ( new_place );
     }
     else
     {
@@ -751,8 +751,8 @@ BigInt * bigint_init_from_string ( char * str )
     }
   }
 
-  free_bigint ( place );
-  free_bigint ( ten );
+  bigint_free ( place );
+  bigint_free ( ten );
 
   return a;
 }
@@ -822,7 +822,7 @@ Bit * walk_toward_lsb ( Bit * b, int count )
 /// not stored
 ///
 /// @return The quotient of dividend/divisor in a new BigInt that must be freed
-/// with free_bigint
+/// with bigint_free
 ///
 BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premainder )
 {
@@ -865,7 +865,7 @@ BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premaind
   }
   else
   {
-    free_bigint ( subby );
+    bigint_free ( subby );
   }
 
   return quotient;

@@ -20,8 +20,8 @@ typedef struct _tag_bigint
 } BigInt;
 
 BigInt * bigint_init ( int );
-void free_bigint ( BigInt * );
-void free_bigint_innards ( BigInt * );
+void bigint_free ( BigInt * );
+void bigint_free_innards ( BigInt * );
 int bigint_low_dword ( BigInt * );
 int bigint_compare ( BigInt *, BigInt * );
 int bigint_compare_magnitude ( BigInt *, BigInt * );
