@@ -50,6 +50,7 @@ Bit * walk_toward_msb ( Bit * , int );
 Bit * walk_toward_lsb ( Bit * , int );
 void bigint_reverse_bits ( BigInt * );
 char * bigint_tostring ( BigInt * );
+BigInt * init_bigint_empty ( );
 
 #endif // _BIGNUM_H
 

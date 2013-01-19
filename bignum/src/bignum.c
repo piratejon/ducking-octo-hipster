@@ -93,21 +93,21 @@ void append_bit ( BigInt * bi, bool b )
 {
   Bit * bit = malloc(sizeof*bit);
 
-  bit->bit = b == 1;
   bi->count ++;
 
-  if ( bi->lsb )
+  bit->bit = b;
+
+  if ( bi->msb )
   {
     bi->msb->next = bit;
     bit->prev = bi->msb;
     bit->next = NULL;
-
     bi->msb = bit;
   }
   else
   {
     bi->lsb = bi->msb = bit;
-    bit->next = bit->prev = NULL;
+    bit->prev = bit->next = NULL;
   }
 }
 
@@ -145,7 +145,7 @@ void prepend_bit ( BigInt * bi, bool b )
 {
   Bit * bit = malloc(sizeof*bit);
 
-  bit->bit = b == 1;
+  bit->bit = b;
   bi->count ++;
 
   bit->prev = NULL;
@@ -828,6 +828,8 @@ BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premaind
 {
   BigInt * quotient, * subby;
   Bit * dividend_pointer;
+  char * divisor_str = bigint_tostring ( divisor );;
+  char * subby_str;
 
   quotient = init_bigint_empty ( );
   subby = init_bigint ( 0 );
@@ -835,20 +837,27 @@ BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premaind
 
   while ( dividend_pointer )
   {
+    subby_str = bigint_tostring ( subby );
+    printf ( "Comparing divisor '%s' with subby '%s'\n", divisor_str, subby_str );
+    free ( subby_str );
+
     if ( bigint_compare ( subby, divisor ) < 0 )
     {
-      fprintf(stderr, "0");
+      fprintf(stderr, "0\n");
       prepend_bit ( quotient, false );
       prepend_bit ( subby, dividend_pointer->bit );
+      fprintf(stderr, "appending to subby, count now %d\n", subby->count );
       dividend_pointer = walk_toward_lsb ( dividend_pointer, 1 );
     }
     else
     {
-      fprintf(stderr, "1");
+      fprintf(stderr, "1\n");
       prepend_bit ( quotient, true );
       bigint_subtract_in_place ( subby, divisor );
     }
   }
+
+  free ( divisor_str );
 
   if ( premainder )
   {
