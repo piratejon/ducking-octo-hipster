@@ -187,6 +187,7 @@ void test_prepend ( void )
   BigInt * a = init_bigint ( 55 );
   BigInt * b = init_bigint ( 110 );
   BigInt * c = init_bigint ( 221 );
+  BigInt * d = init_bigint_empty ( );
 
   prepend_bit ( a, 0 );
   ASSERT ( bigint_compare ( a, b ) == 0, "Failed to prepend 0." );
@@ -194,6 +195,13 @@ void test_prepend ( void )
   prepend_bit ( b, 1 );
   ASSERT ( bigint_compare ( b, c ) == 0, "Failed to prepend 1." );
 
+  prepend_bit ( d, 1 );
+  ASSERT ( bigint_low_dword ( d ) == 1, "failed to prepend 1" );
+
+  prepend_bit ( d, 0 );
+  ASSERT ( bigint_low_dword ( d ) == 2, "failed to prepend 0" );
+
+  free_bigint ( d );
   free_bigint ( c );
   free_bigint ( b );
   free_bigint ( a );
@@ -757,7 +765,7 @@ void do_tests ( void )
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
   TEST ( test_walk_toward_msb );
-  // TEST ( test_bigint_divide );
+  TEST ( test_bigint_divide );
   TEST ( test_reverse_bits );
   TEST ( test_bitlist_compare_magnitude );
   TEST ( test_bigint_binary_slice );
