@@ -31,7 +31,7 @@
 ///
 /// @return The value of the BigInt's MSB prior to removal
 ///
-bool bigint_pop_msb ( BigInt * bi )
+bool bigint_pop_msb ( BigInt * const bi )
 {
   bool out = false;
 
@@ -60,7 +60,7 @@ bool bigint_pop_msb ( BigInt * bi )
 ///
 /// @return The value of the BigInt's LSB prior to shifting/popping.
 ///
-bool bigint_pop_lsb ( BigInt * bi )
+bool bigint_pop_lsb ( BigInt * const bi )
 {
   bool out = false;
 
@@ -89,7 +89,7 @@ bool bigint_pop_lsb ( BigInt * bi )
 /// @param bi The BigInt being extended
 /// @param b The bit extending bi
 ///
-void append_bit ( BigInt * bi, bool b )
+void append_bit ( BigInt * const bi, bool const b )
 {
   Bit * bit = malloc(sizeof*bit);
 
@@ -119,12 +119,12 @@ void append_bit ( BigInt * bi, bool b )
 /// @return A pointer to a new BigInt with the same value as the parameter.
 /// This is a separate copy and must be freed with bigint_free().
 /// 
-BigInt * bigint_copy ( BigInt * a )
+BigInt * bigint_copy ( BigInt const * const a )
 {
   BigInt * b = bigint_init_empty ( );
 
   b->positive = a->positive;
-  Bit * current = a->lsb;
+  Bit const * current = a->lsb;
 
   while ( current )
   {
@@ -141,7 +141,7 @@ BigInt * bigint_copy ( BigInt * a )
 /// @param bi The BigInt being shifted and receiving a new LSB
 /// @param b The value of the BigInt's new LSB
 ///
-void prepend_bit ( BigInt * bi, bool b )
+void prepend_bit ( BigInt * const bi, bool b )
 {
   Bit * bit = malloc(sizeof*bit);
 
@@ -149,14 +149,19 @@ void prepend_bit ( BigInt * bi, bool b )
   bi->count ++;
 
   bit->prev = NULL;
-  bit->next = bi->lsb;
 
   if ( bi->lsb )
   {
+    bit->next = bi->lsb;
     bi->lsb->prev = bit;
+    bi->lsb = bit;
+  }
+  else
+  {
+    bi->msb = bi->lsb = bit;
+    bit->next = NULL;
   }
 
-  bi->lsb = bit;
 }
 
 ///
@@ -189,7 +194,7 @@ BigInt * bigint_init ( int i )
 ///
 /// @param bi The BigInt being reset.
 ///
-void bigint_free_innards ( BigInt * bi )
+void bigint_free_innards ( BigInt * const bi )
 {
   Bit * next;
   while ( bi->lsb )
@@ -208,7 +213,7 @@ void bigint_free_innards ( BigInt * bi )
 ///
 /// @param bi The BigInt being freed.
 ///
-void bigint_free ( BigInt * bi )
+void bigint_free ( BigInt * const bi )
 {
   if ( bi ) bigint_free_innards ( bi );
   free ( bi );
@@ -224,11 +229,11 @@ void bigint_free ( BigInt * bi )
 /// @return The number of bits actually copied, in case [start:end] was outside
 /// bi's actual range.
 ///
-int bigint_slice_bits ( BigInt * bi, int start, int end, int * out )
+int bigint_slice_bits ( BigInt const * const bi, int const start, int const end, int * const out )
 {
   int i;
 
-  Bit * current = bi->lsb;
+  Bit const * current = bi->lsb;
   for (
       i = start;
       i < end && current && current->next;
@@ -251,7 +256,7 @@ int bigint_slice_bits ( BigInt * bi, int start, int end, int * out )
 ///
 /// @return The low sizeof(int) bits from bi
 ///
-int bigint_low_dword ( BigInt * bi )
+int bigint_low_dword ( BigInt const * const bi )
 {
   int lodword;
   bigint_slice_bits ( bi, 0, sizeof(lodword)*8, &lodword );
@@ -267,10 +272,11 @@ int bigint_low_dword ( BigInt * bi )
 ///
 /// @return 0 if |A| == |B|, -1 if |A| < |B|, 1 if |A| > |B|
 ///
-int bigint_compare_magnitude ( BigInt * A, BigInt * B )
+int bigint_compare_magnitude ( BigInt const * const A, BigInt const * const B )
 {
   int i;
-  Bit * a, * b;
+  Bit const * a;
+  Bit const * b;
 
   a = A->msb;
   b = B->msb;
@@ -312,7 +318,7 @@ int bigint_compare_magnitude ( BigInt * A, BigInt * B )
 ///
 /// @return 0 if A == B, -1 if A < B, 1 if A > B
 ///
-int bigint_compare ( BigInt * A, BigInt * B )
+int bigint_compare ( BigInt const * const A, BigInt const * const B )
 {
   if ( A->positive )
   {
@@ -347,7 +353,7 @@ int bigint_compare ( BigInt * A, BigInt * B )
 /// @param carry The address of the carry bit. If NULL, carry is assumed to be
 /// unset and not updated.
 ///
-void single_bit_add_in_place ( bool * a, bool B, bool * carry )
+void single_bit_add_in_place ( bool * const a, bool B, bool * const carry )
 {
   bool A = *a;
   bool C = carry ? *carry : false;
@@ -364,7 +370,7 @@ void single_bit_add_in_place ( bool * a, bool B, bool * carry )
 /// @param A The address of the augend
 /// @param B The address of the addend
 ///
-void bigint_add_in_place ( BigInt * A, BigInt * B )
+void bigint_add_in_place ( BigInt * const A, BigInt const * const B )
 {
   if ( A == B || bigint_compare ( A, B ) == 0 )
   {
@@ -425,10 +431,13 @@ void bigint_add_in_place ( BigInt * A, BigInt * B )
 /// @param augend The augend, receiving the result.
 /// @param addend The addend, added to the augend.
 ///
-void _real_bigint_add_in_place ( BigInt * augend, BigInt * addend )
+void _real_bigint_add_in_place ( BigInt * const augend, BigInt const * const addend )
 {
   bool carry = false;
-  Bit * a, * b;
+
+  Bit const * a;
+  Bit const * b;
+
   a = augend->lsb;
   b = addend->lsb;
 
@@ -467,7 +476,7 @@ void _real_bigint_add_in_place ( BigInt * augend, BigInt * addend )
 /// @param a The BigInt being right-shifted
 /// @param count The number of bits to right-shift by
 ///
-void bigint_shift_right ( BigInt * a, int count )
+void bigint_shift_right ( BigInt * const a, int count )
 {
   for ( ; count > 0; count -- )
   {
@@ -482,7 +491,7 @@ void bigint_shift_right ( BigInt * a, int count )
 /// @param a The BigInt being left-shifted
 /// @param count The number of bits to left-shift by
 ///
-void bigint_shift_left ( BigInt * a, int count )
+void bigint_shift_left ( BigInt * const a, int count )
 {
   for ( ; count > 0; count -- )
   {
@@ -497,7 +506,7 @@ void bigint_shift_left ( BigInt * a, int count )
 /// @param a The destination BigInt
 /// @param b The source BigInt
 ///
-void bigint_shallow_copy ( BigInt * a, BigInt * b )
+void bigint_shallow_copy ( BigInt * const a, BigInt const * const b )
 {
   a->count = b->count;
   a->lsb = b->lsb;
@@ -511,7 +520,7 @@ void bigint_shallow_copy ( BigInt * a, BigInt * b )
 /// @param a One BigInt being swapped.
 /// @param b Another BigInt being swapped.
 ///
-void bigint_swap ( BigInt * a, BigInt * b )
+void bigint_swap ( BigInt * const a, BigInt * const b )
 {
   BigInt tmp;
   bigint_shallow_copy ( &tmp, a );
@@ -528,7 +537,7 @@ void bigint_swap ( BigInt * a, BigInt * b )
 /// @return A new BigInt containing the product of a and b. Must be freed with
 /// bigint_free()
 ///
-BigInt * bigint_multiply ( BigInt * a, BigInt * b )
+BigInt * bigint_multiply ( BigInt const * const a, BigInt const * const b )
 {
   // shift-add method
   BigInt * product, *tmp;
@@ -564,7 +573,7 @@ BigInt * bigint_multiply ( BigInt * a, BigInt * b )
 /// @return true if a is positive; false if a is negative; undefined if a is
 /// zero
 ///
-bool bigint_positive ( BigInt * a )
+bool bigint_positive ( BigInt const * const a )
 {
   return a->positive;
 }
@@ -578,7 +587,7 @@ bool bigint_positive ( BigInt * a )
 /// @return New BigInt whose value is the sum of first and second addend; must
 /// be freed with bigint_free()
 ///
-BigInt * bigint_add ( BigInt * a, BigInt * b )
+BigInt * bigint_add ( BigInt const * const a, BigInt const * const b )
 {
   BigInt * sum = bigint_copy ( a );
   bigint_add_in_place ( sum, b );
@@ -594,7 +603,7 @@ BigInt * bigint_add ( BigInt * a, BigInt * b )
 /// @param borrow The address of the borrow flag. If NULL, borrow is assumed to
 /// be unset and not updated.
 ///
-void single_bit_subtract_in_place ( bool * a, bool B, bool * borrow )
+void single_bit_subtract_in_place ( bool * const a, bool const B, bool * const borrow )
 {
   bool A, Borrow;
 
@@ -613,7 +622,7 @@ void single_bit_subtract_in_place ( bool * a, bool B, bool * borrow )
 /// @param A The address of the minuend
 /// @param B The address of the subtrahend
 ///
-void bigint_subtract_in_place ( BigInt * A, BigInt * B )
+void bigint_subtract_in_place ( BigInt * const A, BigInt const * const B )
 {
   if ( A == B || bigint_compare ( A, B ) == 0 )
   {
@@ -675,7 +684,7 @@ void bigint_subtract_in_place ( BigInt * A, BigInt * B )
 /// @param A The minuend, receiving the result.
 /// @param B The subtrahend, subtracted from the minuend.
 ///
-void _real_bigint_subtract_in_place ( BigInt * A, BigInt * B )
+void _real_bigint_subtract_in_place ( BigInt * const A, BigInt const * const B )
 {
   Bit * a, *b;
   bool borrow;
@@ -707,7 +716,7 @@ void _real_bigint_subtract_in_place ( BigInt * A, BigInt * B )
 /// @return A pointer to the last (non-NULL) character in the NULL-terminated
 /// C-string
 ///
-char * find_string_end ( char * str )
+char const * find_string_end ( char const * str )
 {
   while ( *str ) str ++;
   return str-1;
@@ -723,9 +732,9 @@ char * find_string_end ( char * str )
 ///
 /// @return A new BigInt whose value is equal to the argument's
 ///
-BigInt * bigint_init_from_string ( char * str )
+BigInt * bigint_init_from_string ( char const * const str )
 {
-  char * end;
+  char const * end;
   BigInt * a = bigint_init_empty ( );
   BigInt * place = bigint_init ( 1 );
   BigInt * ten = bigint_init ( 10 );
@@ -767,7 +776,7 @@ BigInt * bigint_init_from_string ( char * str )
 /// @return 0 if equal; 1 if first list > second list; -1 if first list <
 /// second list
 ///
-int bitlist_compare_magnitude_forward ( Bit * msb_a, Bit * msb_b, int count )
+int bitlist_compare_magnitude_forward ( Bit const * msb_a, Bit const * msb_b, int count )
 {
   while ( msb_a && msb_b && count -- )
   {
@@ -792,7 +801,7 @@ int bitlist_compare_magnitude_forward ( Bit * msb_a, Bit * msb_b, int count )
 ///
 /// @return A pointer to the nth bit after the argument
 ///
-Bit * walk_toward_msb ( Bit * b, int count )
+Bit const * walk_toward_msb ( Bit const * b, int count )
 {
   while ( b && count -- ) b = b->next;
   return b;
@@ -806,7 +815,7 @@ Bit * walk_toward_msb ( Bit * b, int count )
 ///
 /// @return A pointer to the nth behind the argument
 ///
-Bit * walk_toward_lsb ( Bit * b, int count )
+Bit const * walk_toward_lsb ( Bit const * b, int count )
 {
   while ( b && count -- ) b = b->prev;
   return b;
@@ -824,38 +833,44 @@ Bit * walk_toward_lsb ( Bit * b, int count )
 /// @return The quotient of dividend/divisor in a new BigInt that must be freed
 /// with bigint_free
 ///
-BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premainder )
+BigInt * bigint_divide ( BigInt const * const dividend, BigInt const * const divisor, BigInt ** premainder )
 {
   BigInt * quotient, * subby;
-  Bit * dividend_pointer;
-  char * divisor_str = bigint_tostring ( divisor );;
-  char * subby_str;
+  Bit const * dividend_pointer;
+  char * subby_str, * divisor_str;
+
+  divisor_str = bigint_tostring ( divisor );
+  subby_str = bigint_tostring ( dividend );
+  fprintf( stderr, "Dividing '%s' by '%s'\n", subby_str, divisor_str );
+  free ( subby_str );
 
   quotient = bigint_init_empty ( );
-  subby = bigint_init ( 0 );
-  dividend_pointer = dividend->msb;
+  subby = bigint_init_empty ( );
 
-  while ( dividend_pointer )
+  dividend_pointer = dividend->msb;
+  prepend_bit ( subby, dividend_pointer->bit );
+  dividend_pointer = walk_toward_lsb ( dividend_pointer, 1 );
+
+  do
   {
     subby_str = bigint_tostring ( subby );
-    printf ( "Comparing divisor '%s' with subby '%s'\n", divisor_str, subby_str );
+    fprintf ( stderr, "comparing '%s' with '%s': ", subby_str, divisor_str );
     free ( subby_str );
-
     if ( bigint_compare ( subby, divisor ) < 0 )
     {
-      fprintf(stderr, "0\n");
+      fprintf ( stderr, "0\n" );
       prepend_bit ( quotient, false );
       prepend_bit ( subby, dividend_pointer->bit );
-      fprintf(stderr, "appending to subby, count now %d\n", subby->count );
       dividend_pointer = walk_toward_lsb ( dividend_pointer, 1 );
     }
     else
     {
-      fprintf(stderr, "1\n");
+      fprintf ( stderr, "1\n" );
       prepend_bit ( quotient, true );
       bigint_subtract_in_place ( subby, divisor );
     }
   }
+  while ( dividend_pointer );
 
   free ( divisor_str );
 
@@ -885,10 +900,10 @@ BigInt * bigint_divide ( BigInt * dividend, BigInt * divisor, BigInt ** premaind
 /// copying will stop at the last bit in the argument. The new BigInt's sign is
 /// the same as the source BigInt's sign.
 ///
-BigInt * bigint_binary_slice ( BigInt * a, int lsb, int msb )
+BigInt * bigint_binary_slice ( BigInt const * const a, int lsb, int const msb )
 {
   BigInt * out = bigint_init_empty ( );
-  Bit * c = walk_toward_msb ( a->lsb, lsb );
+  Bit const * c = walk_toward_msb ( a->lsb, lsb );
   out->positive = a->positive;
   while ( c && lsb ++ < msb )
   {
@@ -903,7 +918,7 @@ BigInt * bigint_binary_slice ( BigInt * a, int lsb, int msb )
 ///
 /// @param bi The BigInt to reverse.
 ///
-void _bigint_reverse_bits ( BigInt * bi )
+void _bigint_reverse_bits ( BigInt * const bi )
 {
   Bit * next, * a;
 
@@ -927,12 +942,12 @@ void _bigint_reverse_bits ( BigInt * bi )
 /// @return A pointer to the C-string containing the BigInt's string
 /// representation. Must be free()d.
 ///
-char * bigint_tostring ( BigInt * bi )
+char * bigint_tostring ( BigInt const * const bi )
 {
   char * out = malloc((sizeof*out)*(1+bi->count));
   int i;
 
-  Bit * bit = bi->msb;
+  Bit const * bit = bi->msb;
 
   for ( i = 0, bit = bi->msb; bit; bit = walk_toward_lsb ( bit, 1 ) )
   {
@@ -941,5 +956,25 @@ char * bigint_tostring ( BigInt * bi )
   out[i] = '\0';
 
   return out;
+}
+
+///
+/// Normalizes a BigInt by removing high zeroes until the MSB is 1.
+///
+/// @param bi The BigInt from which to remove high zeroes
+///
+/// @return The number of high zeroes removed
+///
+int _bigint_remove_high_zeroes ( BigInt * const bi )
+{
+  int count_removed;
+
+  for (
+      count_removed = 0;
+      NULL != bi->msb && false == bi->msb->bit;
+      bigint_pop_msb ( bi ), count_removed ++
+      );
+
+  return count_removed;
 }
 

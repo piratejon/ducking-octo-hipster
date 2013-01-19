@@ -304,7 +304,6 @@ void test_bigint_pop ( void )
 
 void test_bigint_divide ( void )
 {
-  /*
   BigInt * dividend = bigint_init ( 1 );
   BigInt * divisor = bigint_init ( 1 );
   BigInt * zero = bigint_init ( 0 );
@@ -319,18 +318,23 @@ void test_bigint_divide ( void )
   bigint_free ( zero );
   bigint_free ( divisor );
   bigint_free ( dividend );
-  */
 
-  /*
   BigInt * a = bigint_init ( 987653 );
   BigInt * b = bigint_init ( 98765 );
   BigInt * c = bigint_init ( 3 );
-  */
-  BigInt * a = bigint_init ( 21 );
-  BigInt * b = bigint_init ( 2 );
-  BigInt * c = bigint_init ( 1 );
   BigInt * ten = bigint_init ( 10 );
-  BigInt * r, *q;
+  q = bigint_divide ( a, ten, &r );
+  ASSERT ( bigint_compare ( q, b ) == 0, "wrong quotient" );
+  ASSERT ( bigint_compare ( r, c )  == 3, "wrong remainder" );
+
+  bigint_free ( a );
+  bigint_free ( b );
+  bigint_free ( c );
+  bigint_free ( r );
+
+  a = bigint_init ( 21 );
+  b = bigint_init ( 2 );
+  c = bigint_init ( 1 );
     
   q = bigint_divide ( a, ten, &r );
   ASSERT ( bigint_compare ( r, c ) == 0, "Incorrect remainder after division." );
@@ -395,7 +399,7 @@ void test_real_bigint_subtract_in_place ( void )
 
 void test_bigint_subtract ( void )
 {
-  BigInt * a, * b, * c;
+  BigInt * a, * b, * c, * d;
 
   a = bigint_init ( 9999 );
   b = bigint_init ( 3456 );
@@ -434,7 +438,22 @@ void test_bigint_subtract ( void )
   bigint_free ( c );
   bigint_free ( b );
   bigint_free ( a );
-}
+
+  a = bigint_init ( 123 );
+  b = bigint_init ( 127 );
+  c = bigint_init ( -4 );
+  d = bigint_init ( 4 );
+  ASSERT ( a->positive == true && b->positive == true, "A & B signs failed." );
+  bigint_subtract_in_place ( a, b );
+  ASSERT ( a->positive == false, "A sign failed after subtract." );
+  ASSERT ( bigint_compare ( a, c ) == 0, "Sign comparison failed after subtract." );
+  ASSERT ( bigint_compare ( a, d ) == -1, "Sign comparison failed after subtract." );
+  ASSERT ( bigint_compare_magnitude ( a, c ) == 0, "Magnitude comparison failed after subtract." );
+  bigint_free ( d );
+  bigint_free ( c );
+  bigint_free ( b );
+  bigint_free ( a );
+ }
 
 void test_single_bit_subtract_in_place ( void )
 {
@@ -698,7 +717,7 @@ void test_bigint_binary_slice ( void )
 void test_walk_toward_msb ( void )
 {
   BigInt * a = bigint_init ( 1245 ); // 0b10011011101
-  Bit * bit = a->lsb;
+  Bit const * bit = a->lsb;
 
   ASSERT ( bit->bit == true, "wrong LSB for 1245" );
   walk_toward_msb ( bit, 0 );
@@ -744,6 +763,26 @@ void test_bigint_tostring ( void )
   bigint_free ( a );
 }
 
+void test_bigint_remove_high_zeroes ( void )
+{
+  BigInt * a = bigint_init ( 126 );
+  BigInt * b = bigint_init ( 127 );
+  char * lol, * h4x;
+
+  bigint_subtract_in_place ( a, b );
+  
+  lol = bigint_tostring ( a );
+  h4x = bigint_tostring ( b );
+  fprintf(stderr, "lol: '%s', %d\nh4x: '%s', %d\n", lol, a->count, h4x, b->count );
+  free ( lol );
+  free ( h4x );
+
+  // ASSERT ( a->count == 6 && a->msb->bit == false, "weird" );
+
+  bigint_free ( b );
+  bigint_free ( a );
+}
+
 void do_tests ( void )
 {
   TEST ( sanity_check_zero );
@@ -765,11 +804,12 @@ void do_tests ( void )
   TEST ( test_bigint_subtract );
   TEST ( test_bigint_from_string );
   TEST ( test_walk_toward_msb );
-  TEST ( test_bigint_divide );
+  // TEST ( test_bigint_divide );
   TEST ( test_reverse_bits );
   TEST ( test_bitlist_compare_magnitude );
   TEST ( test_bigint_binary_slice );
   TEST ( test_bigint_tostring );
   TEST ( test_append );
+  TEST ( test_bigint_remove_high_zeroes );
 }
 
