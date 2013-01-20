@@ -17,7 +17,7 @@
 /// @return A pointer to a newly-initialized empty BigInt. Must be freed with
 /// bigint_free().
 ///
-/*@out@*/ BigInt * bigint_init_empty ( void )
+BigInt * bigint_init_empty ( void )
 {
   BigInt * b = smalloc(sizeof*b);
 
