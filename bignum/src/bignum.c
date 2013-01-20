@@ -1051,3 +1051,30 @@ BigInt * bigint_modulo ( BigInt const * const dividend, BigInt const * const div
   return remainder;
 }
 
+///
+/// Compute the factorial of a BigInt
+///
+/// @param bi The number to compute the factorial of
+///
+/// @return A new BigInt containing the factorial of the argument. Must be
+/// freed with bigint_free().
+///
+BigInt * bigint_factorial ( BigInt const * const bi )
+{
+  BigInt * one = bigint_init ( 1 );
+  BigInt * factorial = bigint_copy ( one );
+  BigInt * p = bigint_copy ( bi );
+
+  while ( bigint_compare ( p, one ) >= 0 )
+  {
+    BigInt * tmp = bigint_multiply ( factorial, p );
+    bigint_swap ( factorial, tmp );
+    bigint_free ( tmp );
+    bigint_subtract_in_place ( p, one );
+  }
+
+  bigint_free ( p );
+
+  return factorial;
+}
+
